@@ -120,6 +120,46 @@ describe("ruleaza", () => {
     await expect(access(iesire)).rejects.toThrow();
   });
 
+  it("asteapta pauzaMs intre facturi, nu si dupa ultima", async () => {
+    await writeFile(join(intrare, "01.txt"), "TEXT FACTURA UNU");
+    await writeFile(join(intrare, "02.txt"), "TEXT FACTURA DOI");
+    await writeFile(join(intrare, "03.txt"), "TEXT FACTURA UNU");
+    const evenimente: string[] = [];
+    const extrage = extractorDupaText({ "TEXT FACTURA UNU": FACTURA_UNU, "TEXT FACTURA DOI": FACTURA_DOI });
+
+    await ruleaza({
+      extrage: async (text) => {
+        evenimente.push("extrage");
+        return extrage(text);
+      },
+      dirIntrare: intrare,
+      fisierIesire: iesire,
+      log: vi.fn(),
+      pauzaMs: 4500,
+      asteapta: async (ms) => {
+        evenimente.push(`pauza ${ms}`);
+      },
+    });
+
+    expect(evenimente).toEqual(["extrage", "pauza 4500", "extrage", "pauza 4500", "extrage"]);
+  });
+
+  it("nu asteapta deloc fara pauzaMs", async () => {
+    await writeFile(join(intrare, "01.txt"), "TEXT FACTURA UNU");
+    await writeFile(join(intrare, "02.txt"), "TEXT FACTURA DOI");
+    const asteapta = vi.fn(async () => {});
+
+    await ruleaza({
+      extrage: extractorDupaText({ "TEXT FACTURA UNU": FACTURA_UNU, "TEXT FACTURA DOI": FACTURA_DOI }),
+      dirIntrare: intrare,
+      fisierIesire: iesire,
+      log: vi.fn(),
+      asteapta,
+    });
+
+    expect(asteapta).not.toHaveBeenCalled();
+  });
+
   it("nu incarca dotenv/config la import", () => {
     expect(dotenv.incarcat).toBe(false);
   });

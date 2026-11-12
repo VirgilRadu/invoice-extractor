@@ -38,6 +38,22 @@ describe("creeazaExtractor", () => {
     expect(rezultat.tokeni).toEqual({ intrare: 120, iesire: 45 });
   });
 
+  it("numara la iesire si tokenii de gandire, care apar doar in total_tokens", async () => {
+    // Gemini: total = prompt + gandire + raspuns; output_tokens nu include gandirea.
+    const uz = { input_tokens: 100, output_tokens: 40, total_tokens: 190 };
+    const extrage = creeazaExtractor(modelFals(raspuns(FACTURA, uz)), "model-fals");
+    expect((await extrage("text factura")).tokeni).toEqual({ intrare: 100, iesire: 90 });
+  });
+
+  it("nu scade sub output_tokens cand total_tokens lipseste sau e mai mic", async () => {
+    const faraTotal = { input_tokens: 100, output_tokens: 40 } as AIMessage["usage_metadata"];
+    const totalMic = { input_tokens: 100, output_tokens: 40, total_tokens: 0 };
+    for (const uz of [faraTotal, totalMic]) {
+      const extrage = creeazaExtractor(modelFals(raspuns(FACTURA, uz)), "model-fals");
+      expect((await extrage("text factura")).tokeni).toEqual({ intrare: 100, iesire: 40 });
+    }
+  });
+
   it("raporteaza 0 tokeni cand usage_metadata lipseste", async () => {
     const extrage = creeazaExtractor(modelFals(raspuns(FACTURA)), "model-fals");
     const rezultat = await extrage("text factura");

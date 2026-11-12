@@ -12,6 +12,9 @@ export type RezultatExtragere = {
 
 export type Extractor = (text: string) => Promise<RezultatExtragere>;
 
+// 4.5 s intre apeluri tine o rulare sub 15 cereri pe minut (limita gratuita Gemini).
+export const PAUZA_INTRE_APELURI_MS = 4500;
+
 const INSTRUCTIUNE =
   "Extragi datele unei facturi din textul primit. " +
   "Scrie ce spune documentul: nu corecta si nu calcula nicio valoare, nici macar daca pare gresita. " +
@@ -34,10 +37,13 @@ export function creeazaExtractor(model: BaseChatModel, numeModel: string): Extra
       throw new Error(`Raspunsul modelului nu respecta schema:\n${z.prettifyError(verificat.error)}`);
     }
 
+    // Gemini nu pune tokenii de gandire in output_tokens, doar in total_tokens, dar ii factureaza la iesire.
     const uz = (raspuns.raw as AIMessage | undefined)?.usage_metadata;
+    const intrare = uz?.input_tokens ?? 0;
+    const iesire = Math.max(uz?.output_tokens ?? 0, (uz?.total_tokens ?? 0) - intrare);
     return {
       factura: verificat.data,
-      tokeni: { intrare: uz?.input_tokens ?? 0, iesire: uz?.output_tokens ?? 0 },
+      tokeni: { intrare, iesire },
       latentaMs,
       model: numeModel,
     };

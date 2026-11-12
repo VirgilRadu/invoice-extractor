@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateCost, formatCost } from "../../src/lib/cost.js";
+import { calculateCost, formatCost, pricingFor } from "../../src/lib/cost.js";
 
 const UN_MILION = 1_000_000;
 
@@ -28,6 +28,16 @@ describe("calculateCost", () => {
     const flash = calculateCost("gemini-3.5-flash", UN_MILION, UN_MILION);
     expect(lite).toBeCloseTo(0.3 + 2.5, 10);
     expect(lite).not.toBeCloseTo(flash, 10);
+  });
+});
+
+describe("pricingFor", () => {
+  it("intoarce randul de pret folosit de calculateCost", () => {
+    expect(pricingFor("gemini-3.5-flash-lite")).toEqual({ input: 0.3, output: 2.5 });
+  });
+
+  it("intoarce undefined pentru un model necunoscut", () => {
+    expect(pricingFor("model-inexistent")).toBeUndefined();
   });
 });
 

@@ -89,7 +89,8 @@ const PRICING_PER_M_TOKENS: Record<string, { input: number; output: number }> =
     "grok-build-0.1": { input: 1.0, output: 2.0 }, // cel mai ieftin
   };
 
-function pricingFor(model: string): { input: number; output: number } | undefined {
+// Exportat pentru raportul de eval, ca pretul afisat sa fie cel folosit de calculateCost.
+export function pricingFor(model: string): { input: number; output: number } | undefined {
   const key = model.toLowerCase();
   const exact = PRICING_PER_M_TOKENS[key];
   if (exact) return exact;

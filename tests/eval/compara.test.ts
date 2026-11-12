@@ -47,6 +47,14 @@ describe("comparaFactura", () => {
       expect(comparaFactura(ASTEPTAT, obtinut({ furnizor: "Flori Verzi SRL" })).factura.furnizor).toBe(false);
     });
 
+    it("pica un text cu spatiile scoase, nu doar comprimate", () => {
+      expect(comparaFactura(ASTEPTAT, obtinut({ furnizor: "FloriVerzi S.R.L." })).factura.furnizor).toBe(false);
+    });
+
+    it("pica un produs trunchiat", () => {
+      expect(comparaFactura(ASTEPTAT, cuLinie(0, { produs: "Ghiveci ceramic" })).linii[0].produs).toBe(false);
+    });
+
     it("pica un produs cu alt cuvant", () => {
       expect(comparaFactura(ASTEPTAT, cuLinie(1, { produs: "Pamant flori" })).linii[1].produs).toBe(false);
     });
@@ -71,6 +79,10 @@ describe("comparaFactura", () => {
       expect(comparaFactura(ASTEPTAT, obtinut({ cui: "RO45187326" })).factura.cui).toBe(false);
     });
 
+    it("pica un cui diferit doar la prima cifra", () => {
+      expect(comparaFactura(ASTEPTAT, obtinut({ cui: "RO55187325" })).factura.cui).toBe(false);
+    });
+
     it("pica un cui cu alt prefix decat RO", () => {
       expect(comparaFactura(ASTEPTAT, obtinut({ cui: "CUI45187325" })).factura.cui).toBe(false);
     });
@@ -82,7 +94,7 @@ describe("comparaFactura", () => {
     });
 
     it("pica aceeasi zi scrisa in alt format", () => {
-      for (const data of ["14.10.2026", "2026-10-14 ", "2026/10/14"]) {
+      for (const data of ["14.10.2026", "2026-10-14 ", "2026/10/14", "2026-10-14T00:00:00Z"]) {
         expect(comparaFactura(ASTEPTAT, obtinut({ data })).factura.data, data).toBe(false);
       }
     });
@@ -94,9 +106,10 @@ describe("comparaFactura", () => {
       expect(comparaFactura(ASTEPTAT, cuLinie(0, { pret: 45.49 })).linii[0].pret).toBe(true);
     });
 
-    it("pica la diferenta de 0.02", () => {
-      expect(comparaFactura(ASTEPTAT, obtinut({ total: 114.65 })).factura.total).toBe(false);
-      expect(comparaFactura(ASTEPTAT, cuLinie(0, { pret: 45.52 })).linii[0].pret).toBe(false);
+    it("pica la diferenta de 0.015", () => {
+      expect(comparaFactura(ASTEPTAT, obtinut({ total: 114.645 })).factura.total).toBe(false);
+      expect(comparaFactura(ASTEPTAT, obtinut({ total: 114.615 })).factura.total).toBe(false);
+      expect(comparaFactura(ASTEPTAT, cuLinie(0, { pret: 45.515 })).linii[0].pret).toBe(false);
     });
 
     it("trece o diferenta de 0.01 care in virgula mobila iese putin peste", () => {
@@ -115,8 +128,9 @@ describe("comparaFactura", () => {
       expect(comparaFactura(asteptat, cuLinie(0, { cantitate: 2.301 })).linii[0].cantitate).toBe(true);
     });
 
-    it("pica la diferenta de 0.002", () => {
-      expect(comparaFactura(ASTEPTAT, cuLinie(1, { cantitate: 1.252 })).linii[1].cantitate).toBe(false);
+    it("pica la diferenta de 0.0015", () => {
+      expect(comparaFactura(ASTEPTAT, cuLinie(1, { cantitate: 1.2515 })).linii[1].cantitate).toBe(false);
+      expect(comparaFactura(ASTEPTAT, cuLinie(1, { cantitate: 1.2485 })).linii[1].cantitate).toBe(false);
     });
 
     it("nu foloseste toleranta sumelor pentru cantitate", () => {

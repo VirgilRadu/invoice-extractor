@@ -2,10 +2,11 @@
 // Citeste facturile din date/facturi, le extrage cu modelul si scrie rezultate/facturi.csv.
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { setTimeout as pauza } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { citesteFacturi } from "./citire.js";
 import { inCsv, type RandFactura } from "./csv.js";
-import { creeazaExtractor, type Extractor } from "./extractor.js";
+import { creeazaExtractor, PAUZA_INTRE_APELURI_MS, type Extractor } from "./extractor.js";
 import { createModel, getActiveModelName, readProviderFromEnv } from "./lib/llm.js";
 
 export type OptiuniRulare = {
@@ -13,12 +14,22 @@ export type OptiuniRulare = {
   dirIntrare: string;
   fisierIesire: string;
   log: (linie: string) => void;
+  pauzaMs?: number;
+  asteapta?: (ms: number) => Promise<void>;
 };
 
-// Facturile se extrag pe rand; prima extragere esuata opreste rularea si numeste fisierul.
-export async function ruleaza({ extrage, dirIntrare, fisierIesire, log }: OptiuniRulare): Promise<void> {
+// Facturile se extrag pe rand, cu pauzaMs intre ele; prima extragere esuata opreste rularea si numeste fisierul.
+export async function ruleaza({
+  extrage,
+  dirIntrare,
+  fisierIesire,
+  log,
+  pauzaMs = 0,
+  asteapta = (ms) => pauza(ms),
+}: OptiuniRulare): Promise<void> {
   const randuri: RandFactura[] = [];
-  for (const { fisier, text } of await citesteFacturi(dirIntrare)) {
+  for (const [index, { fisier, text }] of (await citesteFacturi(dirIntrare)).entries()) {
+    if (index > 0 && pauzaMs > 0) await asteapta(pauzaMs);
     const { factura, tokeni, latentaMs, model } = await extrage(text).catch((eroare: unknown) => {
       const mesaj = eroare instanceof Error ? eroare.message : String(eroare);
       throw new Error(`${fisier}: ${mesaj}`, { cause: eroare });
@@ -43,6 +54,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     dirIntrare: fileURLToPath(new URL("../date/facturi/", import.meta.url)),
     fisierIesire,
     log: console.log,
+    pauzaMs: PAUZA_INTRE_APELURI_MS,
   });
   console.log("Scris: rezultate/facturi.csv");
 }
