@@ -1,0 +1,28 @@
+{
+  "furnizor": "FIERARIA DIN COLT SRL",
+  "cui": "RO24791506",
+  "data": "2026-11-09",
+  "linii": [
+    {
+      "produs": "SURUBURI LEMN 4X40 (100 BUC)",
+      "cantitate": 2,
+      "pret": 9.9
+    },
+    {
+      "produs": "DIBLURI 6 MM (50 BUC)",
+      "cantitate": 1,
+      "pret": 7.5
+    },
+    {
+      "produs": "BANDA IZOLIERE NEAGRA",
+      "cantitate": 3,
+      "pret": 4.5
+    },
+    {
+      "produs": "LACAT ALAMA 40 MM",
+      "cantitate": 1,
+      "pret": 34
+    }
+  ],
+  "total": 74.8
+}

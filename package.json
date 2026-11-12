@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsx src/ruleaza.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval": "tsx src/eval/ruleaza.ts"
   },
   "dependencies": {
     "@langchain/anthropic": "^1.6.4",

@@ -1,0 +1,23 @@
+{
+  "furnizor": "BRUTARIA CUPTORUL BUNICII SRL",
+  "cui": "41528039",
+  "data": "2026-11-10",
+  "linii": [
+    {
+      "produs": "COVRIGI CU SARE, PUNGA 5 BUC",
+      "cantitate": 2,
+      "pret": 5.5
+    },
+    {
+      "produs": "CORNULETE CU MAGIUN",
+      "cantitate": 6,
+      "pret": 2.2
+    },
+    {
+      "produs": "PAINE DE CASA 800G",
+      "cantitate": 1,
+      "pret": 9.8
+    }
+  ],
+  "total": 34
+}

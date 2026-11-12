@@ -1,0 +1,21 @@
+                      PAPETARIA BIROUL VESEL S.R.L.
+                   Bd. Independenței nr. 40, Iași
+
+FACTURA FISCALA Nr. 00562                          Data facturii: 30/09/2026
+Cumparator: CABINET VETERINAR LABUTA S.R.L., CUI RO33481059
+
+Nr.crt  Denumirea produselor                 UM    Cantitatea  Pret unitar   Valoarea
+                                                                (cu TVA)      (cu TVA)
+ 1      Hârtie copiator A4 "Premium" 80 g     top        5         27,90       139,50
+ 2      Pix cu gel, albastru                  buc       20          3,40        68,00
+ 3      Dosar plic transparent                set        4         11,25        45,00
+ 4      Biblioraft 7,5 cm                     buc        6         14,80        88,80
+ 5      Capsator metalic "Office 24"          buc        1         36,50        36,50
+ 6      Capse 24/6, cutie 1000 buc            cut        3          4,99        14,97
+ 7      Post-it 76x76 mm, galben              set        2         17,60        35,20
+ 8      Marker permanent negru                buc        8          5,25        42,00
+                                                               -----------------------
+                                                  TOTAL GENERAL:              469,97
+                                                  din care TVA:                81,57
+
+Furnizor: PAPETARIA BIROUL VESEL S.R.L. | CUI RO28431054 | J22/1907/2017

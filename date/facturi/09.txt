@@ -1,0 +1,20 @@
+MATERIALE CONSTRUCTII PIATRA ALBA S.R.L.
+Cod fiscal: RO26173943     Nr. ORC: J05/1290/2014
+Sat Valea Mare nr. 112, jud. Bihor
+
+FACTURA Seria PA nr. 2026-1488
+Data: 2 septembrie 2026
+Aviz de insotire nr. 905 / Comanda nr. 3312
+
+Client: CONSTRUCT FERM ARDEAL S.R.L., C.U.I. RO40277192
+
+Poz. | Cantitate | U.M. | Denumire                          | Pret unitar cu TVA | Total linie
+-----+-----------+------+-----------------------------------+--------------------+------------
+1    | 50        | sac  | Ciment Portland 40 kg             | 38,90              | 1.945,00
+2    | 1.250     | kg   | Otel beton PC52, diametru 10 mm   | 6,15               | 7.687,50
+3    | 2,5       | mc   | Nisip spalat 0-4 mm               | 145,00             | 362,50
+4    | 400       | buc  | Caramida plina 240x115x63         | 2,35               | 940,00
+
+                                              Total fara TVA:       9.037,19
+                                              TVA 21%:              1.897,81
+                                              TOTAL:               10.935,00

@@ -1,0 +1,38 @@
+{
+  "furnizor": "ELECTRO SCANTEIA S.R.L.",
+  "cui": "RO16759300",
+  "data": "2026-10-09",
+  "linii": [
+    {
+      "produs": "Cablu MYYM, 3x2,5 mm",
+      "cantitate": 25.5,
+      "pret": 6.4
+    },
+    {
+      "produs": "Priză dublă cu împământare, albă",
+      "cantitate": 4,
+      "pret": 18.75
+    },
+    {
+      "produs": "Întrerupător simplu",
+      "cantitate": 3,
+      "pret": 12.3
+    },
+    {
+      "produs": "Doză aparat, D60",
+      "cantitate": 10,
+      "pret": 1.15
+    },
+    {
+      "produs": "Bec LED E27, 9 W, lumină caldă",
+      "cantitate": 6,
+      "pret": 8.99
+    },
+    {
+      "produs": "Tub PVC flexibil, 16 mm",
+      "cantitate": 12.5,
+      "pret": 2.2
+    }
+  ],
+  "total": 368.04
+}

@@ -1,0 +1,19 @@
+ELECTRO SCANTEIA S.R.L.
+C.I.F.: RO16759300 | J04/552/2012
+Str. Morii nr. 3, Bacău
+
+                         FACTURĂ
+            Seria ESC nr. 7731 din 9 octombrie 2026
+
+Client: persoană fizică
+
+Cod   Denumire                                Cant.   U.M.   Preț cu TVA   Valoare
+EL01  Cablu MYYM, 3x2,5 mm                     25,5    m          6,40      163,20
+EL07  Priză dublă cu împământare, albă            4    buc       18,75       75,00
+EL12  Întrerupător simplu                         3    buc       12,30       36,90
+EL20  Doză aparat, D60                           10    buc        1,15       11,50
+EL31  Bec LED E27, 9 W, lumină caldă              6    buc        8,99       53,94
+EL44  Tub PVC flexibil, 16 mm                  12,5    m          2,20       27,50
+
+                                      Total:              368,04 lei
+                                      TVA inclus (21%):    63,87 lei

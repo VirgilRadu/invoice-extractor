@@ -1,0 +1,33 @@
+{
+  "furnizor": "FERMA \"DEALUL INSORIT\" S.R.L.",
+  "cui": "RO30657194",
+  "data": "2026-10-07",
+  "linii": [
+    {
+      "produs": "Miere de salcam 1 kg",
+      "cantitate": 4,
+      "pret": 52
+    },
+    {
+      "produs": "Branza de burduf, 500 g",
+      "cantitate": 3,
+      "pret": 38.5
+    },
+    {
+      "produs": "Telemea de oaie",
+      "cantitate": 1.5,
+      "pret": 44
+    },
+    {
+      "produs": "Oua de tara",
+      "cantitate": 10,
+      "pret": 1.6
+    },
+    {
+      "produs": "Lapte de oaie",
+      "cantitate": 2,
+      "pret": 12
+    }
+  ],
+  "total": 429.5
+}

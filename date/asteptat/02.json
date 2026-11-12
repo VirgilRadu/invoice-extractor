@@ -1,0 +1,33 @@
+{
+  "furnizor": "MINIMARKET LA DOI PASI S.R.L.",
+  "cui": "RO38714023",
+  "data": "2026-11-03",
+  "linii": [
+    {
+      "produs": "MERE IONATAN",
+      "cantitate": 1.25,
+      "pret": 8.8
+    },
+    {
+      "produs": "LAPTE 3,5% GRASIME 1 L",
+      "cantitate": 2,
+      "pret": 6.49
+    },
+    {
+      "produs": "CASCAVAL DALIA FELIAT",
+      "cantitate": 0.64,
+      "pret": 42.5
+    },
+    {
+      "produs": "PAINE INTEGRALA 500 G",
+      "cantitate": 1,
+      "pret": 4.35
+    },
+    {
+      "produs": "APA PLATA 2 L",
+      "cantitate": 3,
+      "pret": 2.99
+    }
+  ],
+  "total": 64.5
+}

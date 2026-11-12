@@ -1,0 +1,33 @@
+{
+  "furnizor": "AUTO SERVICE ROTILA S.R.L.",
+  "cui": "RO42933862",
+  "data": "2026-08-20",
+  "linii": [
+    {
+      "produs": "Ulei motor 5W-30, 4 l",
+      "cantitate": 1,
+      "pret": 219
+    },
+    {
+      "produs": "Filtru ulei",
+      "cantitate": 1,
+      "pret": 54.9
+    },
+    {
+      "produs": "Filtru aer",
+      "cantitate": 1,
+      "pret": 72.4
+    },
+    {
+      "produs": "Plăcuțe frână față, set",
+      "cantitate": 1,
+      "pret": 289
+    },
+    {
+      "produs": "Manoperă service",
+      "cantitate": 2.5,
+      "pret": 181.5
+    }
+  ],
+  "total": 1089.05
+}

@@ -1,0 +1,28 @@
+{
+  "furnizor": "FARMACIA SALCAMUL VERDE SRL",
+  "cui": "37205811",
+  "data": "2026-11-11",
+  "linii": [
+    {
+      "produs": "VITAMINA C 1000 MG, 30 CPR",
+      "cantitate": 2,
+      "pret": 24.9
+    },
+    {
+      "produs": "SIROP TUSE PLANTE 150 ML",
+      "cantitate": 1,
+      "pret": 31.45
+    },
+    {
+      "produs": "PLASTURI ELASTICE 20 BUC",
+      "cantitate": 3,
+      "pret": 7.6
+    },
+    {
+      "produs": "UNGUENT GALBENELE 50 G",
+      "cantitate": 1,
+      "pret": 16.2
+    }
+  ],
+  "total": 120.25
+}

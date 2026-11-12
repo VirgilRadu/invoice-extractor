@@ -1,0 +1,28 @@
+{
+  "furnizor": "MATERIALE CONSTRUCTII PIATRA ALBA S.R.L.",
+  "cui": "RO26173943",
+  "data": "2026-09-02",
+  "linii": [
+    {
+      "produs": "Ciment Portland 40 kg",
+      "cantitate": 50,
+      "pret": 38.9
+    },
+    {
+      "produs": "Otel beton PC52, diametru 10 mm",
+      "cantitate": 1250,
+      "pret": 6.15
+    },
+    {
+      "produs": "Nisip spalat 0-4 mm",
+      "cantitate": 2.5,
+      "pret": 145
+    },
+    {
+      "produs": "Caramida plina 240x115x63",
+      "cantitate": 400,
+      "pret": 2.35
+    }
+  ],
+  "total": 10935
+}

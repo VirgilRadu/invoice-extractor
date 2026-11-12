@@ -1,0 +1,28 @@
+{
+  "furnizor": "PENSIUNEA DOUA BRAZI S.R.L.",
+  "cui": "39146282",
+  "data": "2026-07-06",
+  "linii": [
+    {
+      "produs": "Cazare camera dubla / noapte",
+      "cantitate": 3,
+      "pret": 320
+    },
+    {
+      "produs": "Mic dejun / persoana",
+      "cantitate": 6,
+      "pret": 35
+    },
+    {
+      "produs": "Taxa de statiune / persoana / zi",
+      "cantitate": 6,
+      "pret": 2.5
+    },
+    {
+      "produs": "Minibar - apa minerala",
+      "cantitate": 2,
+      "pret": 8
+    }
+  ],
+  "total": 1201
+}

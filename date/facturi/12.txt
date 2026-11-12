@@ -1,0 +1,16 @@
+Furnizor: FERMA "DEALUL INSORIT" S.R.L.
+C.I.F. RO30657194
+Loc. Rășinari, jud. Sibiu
+
+FACTURA nr. 118 din 07/10/2026
+
+Cant. | U.M.  | Denumire                    | Pret buc. (cu TVA) | Valoare
+4     | borc. | Miere de salcam 1 kg        | 52,00              | 208,00
+3     | buc   | Branza de burduf, 500 g     | 38,50              | 115,50
+1,5   | kg    | Telemea de oaie             | 44,00              |  66,00
+10    | buc   | Oua de tara                 | 1,60               |  16,00
+2     | l     | Lapte de oaie               | 12,00              |  24,00
+
+TOTAL: 429,50 lei
+TVA 11% inclus: 42,56 lei
+Plata: numerar

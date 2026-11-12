@@ -1,0 +1,23 @@
+{
+  "furnizor": "GRADINA DE SUS PRODUCTIE S.R.L.",
+  "cui": "RO44102762",
+  "data": "2026-08-17",
+  "linii": [
+    {
+      "produs": "Rasaduri rosii cherry, tava 12 buc",
+      "cantitate": 7,
+      "pret": 24
+    },
+    {
+      "produs": "Ierburi aromatice la ghiveci",
+      "cantitate": 15,
+      "pret": 9.5
+    },
+    {
+      "produs": "Ingrasamant organic 5 kg",
+      "cantitate": 2,
+      "pret": 47.9
+    }
+  ],
+  "total": 406.3
+}

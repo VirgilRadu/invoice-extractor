@@ -1,0 +1,20 @@
+FURNIZOR                                    CLIENT
+AUTO SERVICE ROTILA S.R.L.                  TRANSPORT RAPID NORD S.R.L.
+CIF: RO42933862                             CIF: RO15082734
+Reg. Com.: J07/402/2020                     Reg. Com.: J07/1188/2016
+Str. Fabricii nr. 18, Botoșani              Calea Națională nr. 70, Botoșani
+
+                    FACTURĂ FISCALĂ Nr. ASR 0957
+                    Data emiterii: 20 august 2026
+                    Deviz nr. 0957 / Km bord: 184.320
+
+Nr | Denumire                         | U.M. | Cant. | Preț unitar | Valoare
+   |                                  |      |       | cu TVA      | cu TVA
+ 1 | Ulei motor 5W-30, 4 l            | buc  | 1     | 219,00      | 219,00
+ 2 | Filtru ulei                      | buc  | 1     | 54,90       | 54,90
+ 3 | Filtru aer                       | buc  | 1     | 72,40       | 72,40
+ 4 | Plăcuțe frână față, set          | set  | 1     | 289,00      | 289,00
+ 5 | Manoperă service                 | ore  | 2,5   | 181,50      | 453,75
+
+                              Total de plată:   1.089,05 lei
+                              TVA 21%:            189,01 lei

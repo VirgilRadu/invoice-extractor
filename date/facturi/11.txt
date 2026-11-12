@@ -1,0 +1,16 @@
+                              FACTURĂ
+Nr. CNT-0412                                          Data: 31.10.2026
+
+Prestator:  CONTA EXACT EXPERT S.R.L.
+            Cod fiscal 215476
+            Str. Libertății nr. 9, Timișoara
+
+Beneficiar: TIPOGRAFIA LITERA MICA S.R.L.
+            CUI RO18304622
+
+Descriere                                       Cantitate   Preț unitar (cu TVA)      Total
+Servicii contabilitate, luna octombrie 2026        1 lună              1.815,00   1.815,00
+Consultanță fiscală suplimentară                  7,5 ore                145,20   1.089,00
+Întocmire declarații, situații lunare               2 buc                121,00     242,00
+
+Total de plată: 3.146,00 lei (din care TVA 21%: 546,00 lei)

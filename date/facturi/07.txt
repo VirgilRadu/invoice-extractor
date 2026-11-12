@@ -1,0 +1,34 @@
+DOCUMENT: FACTURA
+Numar: GRD-0088
+Data emiterii: 2026-08-17
+Data scadentei: 2026-09-16
+
+Beneficiar:
+  CAFENEAUA COLTUL CU CARTI S.R.L.
+  CUI: RO19566486
+
+Vanzator:
+  GRADINA DE SUS PRODUCTIE S.R.L.
+  Cod fiscal: RO44102762
+
+Pozitia 1
+  Produs: Rasaduri rosii cherry, tava 12 buc
+  Cantitate: 7
+  Pret unitar (TVA inclus): 24,00 lei
+  Valoare: 168,00 lei
+
+Pozitia 2
+  Produs: Ierburi aromatice la ghiveci
+  Cantitate: 15
+  Pret unitar (TVA inclus): 9,50 lei
+  Valoare: 142,50 lei
+
+Pozitia 3
+  Produs: Ingrasamant organic 5 kg
+  Cantitate: 2
+  Pret unitar (TVA inclus): 47,90 lei
+  Valoare: 95,80 lei
+
+Total fara TVA: 366,04 lei
+TVA 11%: 40,26 lei
+Total de plata: 406,30 lei

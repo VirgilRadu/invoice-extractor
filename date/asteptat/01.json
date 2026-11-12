@@ -1,0 +1,23 @@
+{
+  "furnizor": "ATELIERUL VERDE FLORAL S.R.L.",
+  "cui": "RO45187325",
+  "data": "2026-10-14",
+  "linii": [
+    {
+      "produs": "Ghiveci ceramic 20 cm",
+      "cantitate": 2,
+      "pret": 45.5
+    },
+    {
+      "produs": "Pământ pentru flori 10 l",
+      "cantitate": 3,
+      "pret": 18.9
+    },
+    {
+      "produs": "Orhidee Phalaenopsis albă",
+      "cantitate": 1,
+      "pret": 89.99
+    }
+  ],
+  "total": 237.69
+}

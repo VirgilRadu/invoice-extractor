@@ -1,0 +1,18 @@
+{
+  "furnizor": "DIGITAL SOFT LABS S.R.L.",
+  "cui": "21945678",
+  "data": "2026-09-22",
+  "linii": [
+    {
+      "produs": "Dezvoltare modul raportare vanzari",
+      "cantitate": 1,
+      "pret": 4235
+    },
+    {
+      "produs": "Mentenanta aplicatie (luna)",
+      "cantitate": 3,
+      "pret": 1210
+    }
+  ],
+  "total": 7865
+}

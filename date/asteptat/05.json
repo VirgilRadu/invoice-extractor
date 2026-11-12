@@ -1,0 +1,13 @@
+{
+  "furnizor": "PETROL EXPRES DRUMUL MARE SRL",
+  "cui": "33928174",
+  "data": "2026-11-05",
+  "linii": [
+    {
+      "produs": "MOTORINA STANDARD",
+      "cantitate": 42.37,
+      "pret": 7.89
+    }
+  ],
+  "total": 334.3
+}

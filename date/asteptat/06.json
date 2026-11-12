@@ -1,0 +1,48 @@
+{
+  "furnizor": "PAPETARIA BIROUL VESEL S.R.L.",
+  "cui": "RO28431054",
+  "data": "2026-09-30",
+  "linii": [
+    {
+      "produs": "Hârtie copiator A4 \"Premium\" 80 g",
+      "cantitate": 5,
+      "pret": 27.9
+    },
+    {
+      "produs": "Pix cu gel, albastru",
+      "cantitate": 20,
+      "pret": 3.4
+    },
+    {
+      "produs": "Dosar plic transparent",
+      "cantitate": 4,
+      "pret": 11.25
+    },
+    {
+      "produs": "Biblioraft 7,5 cm",
+      "cantitate": 6,
+      "pret": 14.8
+    },
+    {
+      "produs": "Capsator metalic \"Office 24\"",
+      "cantitate": 1,
+      "pret": 36.5
+    },
+    {
+      "produs": "Capse 24/6, cutie 1000 buc",
+      "cantitate": 3,
+      "pret": 4.99
+    },
+    {
+      "produs": "Post-it 76x76 mm, galben",
+      "cantitate": 2,
+      "pret": 17.6
+    },
+    {
+      "produs": "Marker permanent negru",
+      "cantitate": 8,
+      "pret": 5.25
+    }
+  ],
+  "total": 469.97
+}

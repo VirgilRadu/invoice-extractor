@@ -1,0 +1,14 @@
+   PETROL EXPRES DRUMUL MARE SRL
+   STATIA NR. 27 - DN1 KM 88
+   CIF: 33928174
+
+   POMPA 4
+   42,37 L x 7,89 LEI/L
+   MOTORINA STANDARD             334,30 A
+
+   TOTAL                         334,30
+   NUMERAR                       350,00
+   REST                           15,70
+   TVA A 21%                      58,02
+
+   05.11.2026 07:58     BON 001842

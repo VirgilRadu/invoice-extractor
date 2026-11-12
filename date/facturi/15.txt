@@ -1,0 +1,19 @@
+PENSIUNEA DOUA BRAZI S.R.L.
+CUI: 39146282 · J08/2201/2019
+Str. Poienii nr. 4, Predeal, jud. Brașov
+
+FACTURA nr. 2026/00877
+Data: 2026-07-06
+Rezervare nr. 55102, sejur 02.07.2026 - 05.07.2026, 2 persoane
+Client: ATELIER DE DESIGN ARC S.R.L., CUI RO13982640
+
+Articol                           Cant.   Pret unitar   Cota TVA     Valoare
+                                          (cu TVA)
+Cazare camera dubla / noapte         3       320,00        11%       960,00
+Mic dejun / persoana                 6        35,00        11%       210,00
+Taxa de statiune / persoana / zi     6         2,50         -         15,00
+Minibar - apa minerala               2         8,00        21%        16,00
+
+Total fara TVA:       1.082,27 lei
+Total TVA:              118,73 lei
+TOTAL DE PLATA:       1.201,00 lei

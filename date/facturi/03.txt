@@ -1,0 +1,24 @@
+FACTURA nr. DSL-2026-0193                              Data: 2026-09-22
+Comanda client nr. 4471 / 2026-09-01
+
+FURNIZOR
+  Denumire:    DIGITAL SOFT LABS S.R.L.
+  Cod fiscal:  21945678
+  Reg. Com.:   J40/8812/2015
+  Sediu:       Str. Zorilor nr. 15, București, sector 3
+
+CLIENT
+  Denumire:    LOGISTICA PODUL INALT S.A.
+  CUI:         RO40862137
+  Reg. Com.:   J22/3390/2018
+
+Denumire serviciu                     | Pret unitar cu TVA | Cantitate | Valoare cu TVA
+--------------------------------------+--------------------+-----------+---------------
+Dezvoltare modul raportare vanzari    |          4.235,00  |         1 |       4.235,00
+Mentenanta aplicatie (luna)           |          1.210,00  |         3 |       3.630,00
+
+                                         Total fara TVA:            6.500,00
+                                         TVA 21%:                   1.365,00
+                                         TOTAL DE PLATA (RON):      7.865,00
+
+Scadenta: 2026-10-22

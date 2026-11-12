@@ -1,0 +1,23 @@
+{
+  "furnizor": "CONTA EXACT EXPERT S.R.L.",
+  "cui": "215476",
+  "data": "2026-10-31",
+  "linii": [
+    {
+      "produs": "Servicii contabilitate, luna octombrie 2026",
+      "cantitate": 1,
+      "pret": 1815
+    },
+    {
+      "produs": "Consultanță fiscală suplimentară",
+      "cantitate": 7.5,
+      "pret": 145.2
+    },
+    {
+      "produs": "Întocmire declarații, situații lunare",
+      "cantitate": 2,
+      "pret": 121
+    }
+  ],
+  "total": 3146
+}
