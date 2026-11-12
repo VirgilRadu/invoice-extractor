@@ -6,7 +6,16 @@ import {
 } from "../../src/lib/llm.js";
 
 // Fiecare test porneste fara variabilele LLM si lasa process.env cum l-a gasit.
-const VARIABILE = ["LLM_PROVIDER", "GOOGLE_API_KEY", "GEMINI_MODEL"] as const;
+const VARIABILE = [
+  "LLM_PROVIDER",
+  "GOOGLE_API_KEY",
+  "GEMINI_MODEL",
+  "OPENAI_API_KEY",
+  "OPENAI_MODEL",
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_MODEL",
+  "OLLAMA_MODEL",
+] as const;
 let mediuSalvat: NodeJS.ProcessEnv;
 
 beforeEach(() => {
@@ -52,6 +61,39 @@ describe("createModel", () => {
     process.env.GOOGLE_API_KEY = "cheie-de-test";
     const model = createModel("gemini") as unknown as { model: string };
     expect(model.model).toBe("gemini-3.5-flash-lite");
+  });
+
+  describe("[+ Tema 7] optiunile model si maxRetries", () => {
+    type Construit = { model: string; caller: { maxRetries: number } };
+    beforeEach(() => {
+      process.env.GOOGLE_API_KEY = "cheie-de-test";
+    });
+
+    it("construieste modelul cerut in optiuni, peste GEMINI_MODEL", () => {
+      process.env.GEMINI_MODEL = "gemini-din-mediu";
+      expect((createModel("gemini", { model: "x" }) as unknown as Construit).model).toBe("x");
+    });
+
+    it("da maxRetries constructorului", () => {
+      expect((createModel("gemini", { maxRetries: 1 }) as unknown as Construit).caller.maxRetries).toBe(1);
+      expect((createModel("gemini", { maxRetries: 0 }) as unknown as Construit).caller.maxRetries).toBe(0);
+    });
+
+    it("fara optiuni pastreaza GEMINI_MODEL si cele 6 reincercari implicite ale bibliotecii", () => {
+      process.env.GEMINI_MODEL = "gemini-din-mediu";
+      const model = createModel("gemini") as unknown as Construit;
+      expect(model.model).toBe("gemini-din-mediu");
+      expect(model.caller.maxRetries).toBe(6);
+    });
+
+    it("da modelul si maxRetries si celorlalti provideri", () => {
+      process.env.OPENAI_API_KEY = "cheie-de-test";
+      process.env.ANTHROPIC_API_KEY = "cheie-de-test";
+      for (const provider of ["openai", "anthropic", "ollama"] as const) {
+        const model = createModel(provider, { model: "m", maxRetries: 2 }) as unknown as Construit;
+        expect([model.model, model.caller.maxRetries], provider).toEqual(["m", 2]);
+      }
+    });
   });
 });
 

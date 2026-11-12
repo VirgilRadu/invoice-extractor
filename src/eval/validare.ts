@@ -18,6 +18,9 @@ export type SumarValidare = {
   gresiteSemnalate: number;
   corecte: number;
   corecteOk: number;
+  // Corectele care nu au ramas ok: nevalidate (extragere esuata) sau semnalate.
+  corecteEsuate: number;
+  corecteSemnalate: number;
   total: number;
   potrivite: number;
 };
@@ -45,6 +48,8 @@ export function sumarValidare(randuri: ValidareFactura[], dataReferinta: string)
     gresiteSemnalate: numara("gresita_coduri_asteptate", "gresita_alte_coduri"),
     corecte: facturi.length - gresite,
     corecteOk: numara("corecta_ok"),
+    corecteEsuate: facturi.filter((f) => f.asteptate.length === 0 && f.verdict === "extragere_esuata").length,
+    corecteSemnalate: numara("corecta_semnalata"),
     total: facturi.length,
     potrivite: numara("corecta_ok", "gresita_coduri_asteptate"),
   };

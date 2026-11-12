@@ -58,6 +58,16 @@ describe("valideazaFactura", () => {
       expect(coduri(factura({ linii, total: 4.45 }))).toEqual(["suma_diferita"]);
     });
 
+    it("rotunjeste jumatatea in sus si cand produsul e stocat putin sub ea", () => {
+      // 1 x 1.005 = 1.00499999999999989...: fara corectia de 1e-6 linia ar fi 1.00, nu 1.01.
+      const linie = (cantitate: number, pret: number) => [{ produs: "X", cantitate, pret }];
+      expect(coduri(factura({ linii: linie(1, 1.005), total: 1.02 }))).toEqual([]);
+      expect(coduri(factura({ linii: linie(1, 1.005), total: 0.99 }))).toEqual(["suma_diferita"]);
+      // 0.5 x 56.29 = 28.145 -> 28.15
+      expect(coduri(factura({ linii: linie(0.5, 56.29), total: 28.16 }))).toEqual([]);
+      expect(coduri(factura({ linii: linie(0.5, 56.29), total: 28.13 }))).toEqual(["suma_diferita"]);
+    });
+
     it("trece bonul de carburant 42.37 x 7.89 = 334.30", () => {
       expect(coduri(factura({ linii: [{ produs: "MOTORINA", cantitate: 42.37, pret: 7.89 }], total: 334.3 }))).toEqual(
         [],
@@ -89,6 +99,11 @@ describe("valideazaFactura", () => {
     it("accepta 29 februarie doar in an bisect", () => {
       expect(coduri(factura({ data: "2028-02-29" }), "2028-03-01")).toEqual([]);
       expect(coduri(factura({ data: "2026-02-29" }))).toEqual(["data_invalida"]);
+    });
+
+    it("trateaza anii de secol: 2000 bisect (divizibil cu 400), 2100 nu", () => {
+      expect(coduri(factura({ data: "2000-02-29" }))).toEqual([]);
+      expect(coduri(factura({ data: "2100-02-29" }), "2100-03-01")).toEqual(["data_invalida"]);
     });
 
     it("respinge o zi care nu exista, chiar daca Date ar muta-o in martie", () => {
@@ -164,6 +179,12 @@ describe("valideazaFactura", () => {
       }
     });
 
+    it("respinge CUI-ul care incepe cu 0, chiar daca cifra de control s-ar potrivi", () => {
+      for (const cui of ["00", "RO00", "0000000019", "RO 045187325", "01"]) {
+        expect(coduri(factura({ cui })), cui).toEqual(["cui_format"]);
+      }
+    });
+
     it("respinge alt prefix sau semne de punctuatie", () => {
       for (const cui of ["CUI45187325", "RO-45187325", "RORO45187325", "45.187.325", "+45187325"]) {
         expect(coduri(factura({ cui })), cui).toEqual(["cui_format"]);
@@ -172,7 +193,7 @@ describe("valideazaFactura", () => {
 
     it("numeste CUI-ul in mesaj", () => {
       expect(valideazaFactura(factura({ cui: "RO45187325123" }), AZI)).toEqual([
-        { cod: "cui_format", mesaj: 'CUI "RO45187325123" nu are formatul RO optional + 2-10 cifre' },
+        { cod: "cui_format", mesaj: 'CUI "RO45187325123" nu are formatul RO optional + 2-10 cifre, prima diferita de 0' },
       ]);
     });
   });

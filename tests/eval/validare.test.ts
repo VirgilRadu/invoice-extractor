@@ -54,6 +54,29 @@ describe("sumarValidare", () => {
     expect(potrivite).toBe(1);
   });
 
+  it("imparte corectele care nu au ramas ok in extrageri esuate si semnalate", () => {
+    expect(SUMAR).toMatchObject({ corecteEsuate: 0, corecteSemnalate: 1 });
+    const sumar = sumarValidare(
+      [
+        { fisier: "01.txt", asteptate: [], obtinute: null },
+        { fisier: "02.txt", asteptate: [], obtinute: ["cui_format"] },
+        { fisier: "03.txt", asteptate: [], obtinute: null },
+        { fisier: "04.txt", asteptate: ["cui_format"], obtinute: null },
+      ],
+      REFERINTA,
+    );
+    expect(sumar).toMatchObject({ corecte: 3, corecteOk: 0, corecteEsuate: 2, corecteSemnalate: 1 });
+  });
+
+  it("nu numara ca potrivire exacta codurile obtinute care le cuprind pe cele asteptate plus altele", () => {
+    const sumar = sumarValidare(
+      [{ fisier: "01.txt", asteptate: ["suma_diferita"], obtinute: ["suma_diferita", "data_in_viitor"] }],
+      REFERINTA,
+    );
+    expect(sumar.facturi[0].verdict).toBe("gresita_alte_coduri");
+    expect(sumar).toMatchObject({ gresiteSemnalate: 1, potrivite: 0 });
+  });
+
   it("nu numara o extragere esuata nici semnalata, nici ok, nici potrivita", () => {
     const sumar = sumarValidare(
       [

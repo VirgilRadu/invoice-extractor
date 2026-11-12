@@ -4,12 +4,19 @@ import { calculateCost } from "../../src/lib/cost.js";
 
 const LITE = "gemini-3.5-flash-lite";
 
-function reusita(fisier: string, intrare: number, iesire: number, latentaMs: number, model = LITE): ConsumFactura {
-  return { fisier, corecte: 8, controale: 8, tokeni: { intrare, iesire }, latentaMs, model };
+function reusita(
+  fisier: string,
+  intrare: number,
+  iesire: number,
+  latentaMs: number,
+  model = LITE,
+  dinRezerva = false,
+): ConsumFactura {
+  return { fisier, corecte: 8, controale: 8, tokeni: { intrare, iesire }, latentaMs, model, dinRezerva };
 }
 
 function esuata(fisier: string): ConsumFactura {
-  return { fisier, corecte: 0, controale: 8, tokeni: { intrare: 0, iesire: 0 }, latentaMs: null, model: null };
+  return { fisier, corecte: 0, controale: 8, tokeni: { intrare: 0, iesire: 0 }, latentaMs: null, model: null, dinRezerva: false };
 }
 
 describe("sumarConsum", () => {
@@ -49,6 +56,32 @@ describe("sumarConsum", () => {
       latentaMedieMs: null,
       latentaMaxMs: null,
     });
+  });
+
+  it("aduna facturile, tokenii si costul pe fiecare model care a raspuns, in ordinea primei aparitii", () => {
+    const FLASH = "gemini-3-flash-preview";
+    const sumar = sumarConsum([
+      reusita("01.txt", 1000, 200, 1500, FLASH),
+      reusita("02.txt", 100, 20, 900),
+      esuata("03.txt"),
+      reusita("04.txt", 2000, 400, 8000, FLASH),
+    ]);
+    expect(sumar.modele).toEqual([
+      { model: FLASH, facturi: 2, intrare: 3000, iesire: 600, cost: calculateCost(FLASH, 3000, 600) },
+      { model: LITE, facturi: 1, intrare: 100, iesire: 20, cost: calculateCost(LITE, 100, 20) },
+    ]);
+    // gemini-3-flash-preview are pretul randului gemini-3-flash: 0.50 / 3.00
+    expect(sumar.modele[0].cost).toBeCloseTo((3000 * 0.5 + 600 * 3) / 1_000_000, 15);
+  });
+
+  it("numara facturile la care a raspuns rezerva dupa marcaj, nu dupa numele modelului", () => {
+    const sumar = sumarConsum([
+      reusita("01.txt", 10, 5, 100, LITE, true),
+      reusita("02.txt", 10, 5, 100, LITE, false),
+      esuata("03.txt"),
+      reusita("04.txt", 10, 5, 100, "alt-model", true),
+    ]);
+    expect(sumar.deRezerva).toBe(2);
   });
 
   it("marcheaza costul ca necunoscut cand modelul nu are pret, in loc de 0", () => {

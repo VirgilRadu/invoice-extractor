@@ -62,8 +62,9 @@ function problemeData({ data }: Factura, azi: string): Problema<CodValidare>[] {
 // Cheia 753217532 se aliniaza la dreapta peste cifrele dinaintea cifrei de control; (suma x 10) mod 11, 10 devine 0.
 function problemeCui({ cui }: Factura): Problema<CodValidare>[] {
   const cifre = cui.replace(/\s+/g, "").replace(/^ro/i, "");
-  if (!/^\d{2,10}$/.test(cifre)) {
-    return [{ cod: "cui_format", mesaj: `CUI ${JSON.stringify(cui)} nu are formatul RO optional + 2-10 cifre` }];
+  if (!/^[1-9]\d{1,9}$/.test(cifre)) {
+    const mesaj = `CUI ${JSON.stringify(cui)} nu are formatul RO optional + 2-10 cifre, prima diferita de 0`;
+    return [{ cod: "cui_format", mesaj }];
   }
   const corp = cifre.slice(0, -1);
   const cheie = CHEIE_CUI.slice(-corp.length);
@@ -79,9 +80,13 @@ function problemeCui({ cui }: Factura): Problema<CodValidare>[] {
   ];
 }
 
+export function verificaZiuaDeReferinta(azi: string): void {
+  if (!dataReala(azi)) throw new Error(`Ziua de referinta ${JSON.stringify(azi)} nu este o data YYYY-MM-DD reala`);
+}
+
 // Modelul extrage, codul decide: valorile se citesc, nu se corecteaza. Ordinea: linii, data, CUI.
 export function valideazaFactura(factura: Factura, azi: string): Problema<CodValidare>[] {
-  if (!dataReala(azi)) throw new Error(`Ziua de referinta ${JSON.stringify(azi)} nu este o data YYYY-MM-DD reala`);
+  verificaZiuaDeReferinta(azi);
   return [...problemeLinii(factura), ...problemeData(factura, azi), ...problemeCui(factura)];
 }
 

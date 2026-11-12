@@ -6,8 +6,8 @@ import { setTimeout as pauza } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { citesteFacturi } from "./citire.js";
 import { inCsv, type RandFactura } from "./csv.js";
-import { creeazaExtractor, PAUZA_INTRE_APELURI_MS, type Extractor, type RezultatExtragere } from "./extractor.js";
-import { createModel, getActiveModelName, readProviderFromEnv } from "./lib/llm.js";
+import { PAUZA_INTRE_APELURI_MS, type Extractor, type RezultatExtragere } from "./extractor.js";
+import { descriereModele, extractorDinModele, modeleDinMediu, numeModele } from "./model.js";
 import { statusFactura, valideazaFactura, ziuaCalendaristica, type Problema } from "./validare.js";
 
 export type OptiuniRulare = {
@@ -65,10 +65,11 @@ export async function ruleaza({
 // .env se incarca doar cand fisierul e rulat ca script, niciodata la import.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await import("dotenv/config");
-  const provider = readProviderFromEnv();
+  const modele = modeleDinMediu();
+  console.log(descriereModele(numeModele(modele)));
   const fisierIesire = fileURLToPath(new URL("../rezultate/facturi.csv", import.meta.url));
   await ruleaza({
-    extrage: creeazaExtractor(createModel(provider), getActiveModelName(provider)),
+    extrage: extractorDinModele(modele),
     dirIntrare: fileURLToPath(new URL("../date/facturi/", import.meta.url)),
     fisierIesire,
     log: console.log,

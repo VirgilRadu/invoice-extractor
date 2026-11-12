@@ -30,6 +30,11 @@ export type SumarEval = {
   corecte: number;
   totalControale: number;
   acurateteTotala: number;
+  // Aceleasi masuri fara facturile cu extragere esuata; acurateteExtrase null cand nicio factura nu a fost extrasa.
+  esuate: number;
+  corecteExtrase: number;
+  controaleExtrase: number;
+  acurateteExtrase: number | null;
   detalii: DetaliuFactura[];
 };
 
@@ -100,11 +105,15 @@ export function sumarEval(rezultate: RezultatFactura[]): SumarEval {
   };
 
   let facturiComplete = 0;
+  let esuate = 0;
+  let controaleEsuate = 0;
   const detalii: DetaliuFactura[] = [];
   for (const rezultat of rezultate) {
     if ("eroare" in rezultat) {
       for (const control of CONTROALE_FACTURA) adauga(control, false);
       for (const _ of rezultat.asteptat.linii) for (const control of CONTROALE_LINIE) adauga(control, false);
+      esuate += 1;
+      controaleEsuate += CONTROALE_FACTURA.length + CONTROALE_LINIE.length * rezultat.asteptat.linii.length;
       detalii.push({ fisier: rezultat.fisier, eroare: rezultat.eroare, esecuri: [] });
       continue;
     }
@@ -132,6 +141,10 @@ export function sumarEval(rezultate: RezultatFactura[]): SumarEval {
     corecte,
     totalControale,
     acurateteTotala: acuratete(corecte, totalControale),
+    esuate,
+    corecteExtrase: corecte,
+    controaleExtrase: totalControale - controaleEsuate,
+    acurateteExtrase: totalControale === controaleEsuate ? null : corecte / (totalControale - controaleEsuate),
     detalii,
   };
 }

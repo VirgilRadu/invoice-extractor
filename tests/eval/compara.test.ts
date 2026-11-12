@@ -206,6 +206,17 @@ describe("sumarEval", () => {
     expect(sumar.acurateteTotala).toBe(18 / 30);
   });
 
+  it("numara extragerile esuate si acuratetea doar pe facturile extrase", () => {
+    const sumar = sumarEval(REZULTATE);
+    // fara 03 (5 + 2 x 3 = 11 controale): 30 - 11 = 19 controale extrase, 18 corecte.
+    expect(sumar).toMatchObject({ esuate: 1, corecteExtrase: 18, controaleExtrase: 19, acurateteExtrase: 18 / 19 });
+    expect(sumarEval([{ fisier: "03.txt", asteptat: ASTEPTAT, eroare: "503" }])).toMatchObject({
+      esuate: 1,
+      controaleExtrase: 0,
+      acurateteExtrase: null,
+    });
+  });
+
   it("numara toate controalele unei extrageri esuate ca gresite si pastreaza eroarea", () => {
     const sumar = sumarEval([{ fisier: "03.txt", asteptat: ASTEPTAT, eroare: "timeout" }]);
     for (const scor of Object.values(sumar.controale)) expect(scor.corecte).toBe(0);

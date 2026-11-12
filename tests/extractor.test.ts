@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { AIMessage } from "@langchain/core/messages";
 import { FakeToolCallingModel } from "langchain";
 import { creeazaExtractor } from "../src/extractor.js";
+import { ModelCarePica, ModelCareRaspunde } from "./modele-false.js";
 
 const FACTURA = {
   furnizor: "Florarie Test SRL",
@@ -88,5 +89,126 @@ describe("creeazaExtractor", () => {
     const totalText = { ...FACTURA, total: "147.70" };
     const extrage = creeazaExtractor(modelFals(raspuns(totalText, UZ)), "model-fals");
     await expect(extrage("text factura")).rejects.toThrow(/total/);
+  });
+});
+
+describe("creeazaExtractor cu rezerve", () => {
+  const UZ_REZERVA = { input_tokens: 700, output_tokens: 90, total_tokens: 820 };
+  const pica = (mesaj = "503 Service Unavailable: high demand") => new ModelCarePica(new Error(mesaj));
+
+  it("foloseste principalul cand raspunde; rezerva nu este apelata", async () => {
+    const principal = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ) });
+    const rezerva = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ_REZERVA) });
+    const extrage = creeazaExtractor(principal, "principal", [{ model: rezerva, nume: "rezerva" }]);
+
+    const rezultat = await extrage("text factura");
+
+    expect(rezultat).toMatchObject({
+      factura: FACTURA,
+      model: "principal",
+      dinRezerva: false,
+      tokeni: { intrare: 120, iesire: 45 },
+    });
+    expect([principal.apeluri, rezerva.apeluri]).toEqual([1, 0]);
+  });
+
+  it("trece pe rezerva cand principalul arunca; modelul si tokenii sunt ai rezervei", async () => {
+    const principal = pica();
+    const rezerva = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ_REZERVA) });
+    const extrage = creeazaExtractor(principal, "principal", [{ model: rezerva, nume: "rezerva" }]);
+
+    const rezultat = await extrage("text factura");
+
+    expect(rezultat).toMatchObject({
+      factura: FACTURA,
+      model: "rezerva",
+      dinRezerva: true,
+      tokeni: { intrare: 700, iesire: 120 },
+    });
+    expect([principal.apeluri, rezerva.apeluri]).toEqual([1, 1]);
+  });
+
+  it("cand pica toate, eroarea numeste fiecare model incercat si eroarea lui, in ordine", async () => {
+    const principal = pica("503 principal");
+    const rezerva = pica("429 rezerva");
+    const extrage = creeazaExtractor(principal, "principal", [{ model: rezerva, nume: "rezerva" }]);
+
+    const eroare = await extrage("text factura").catch((e: unknown) => e);
+
+    expect(eroare).toBeInstanceOf(Error);
+    expect((eroare as Error).message).toBe("principal: 503 principal; rezerva: 429 rezerva");
+    expect((eroare as Error).cause).toBe(principal.eroare);
+    expect([principal.apeluri, rezerva.apeluri]).toEqual([1, 1]);
+  });
+
+  it("scrie pe un singur rand eroarea pe mai multe randuri a unui model", async () => {
+    const extrage = creeazaExtractor(pica("503 Service Unavailable\n  high demand"), "principal", [
+      { model: pica("429 Too Many Requests\n* Quota exceeded"), nume: "rezerva" },
+      { model: pica("500 intern"), nume: "a-doua" },
+    ]);
+    await expect(extrage("text factura")).rejects.toThrow(
+      /^principal: 503 Service Unavailable high demand; rezerva: 429 Too Many Requests \* Quota exceeded; a-doua: 500 intern$/,
+    );
+  });
+
+  it("tine erorile fiecarei extrageri separat cand doua extrageri ruleaza in acelasi timp", async () => {
+    const principal = new ModelCarePica((text) => new Error(`503 ${text}`), 20);
+    const rezerva = new ModelCarePica((text) => new Error(`429 ${text}`), 5);
+    const extrage = creeazaExtractor(principal, "principal", [{ model: rezerva, nume: "rezerva" }]);
+
+    const rezultate = await Promise.allSettled([extrage("A"), extrage("B")]);
+
+    expect(rezultate.map((r) => (r.status === "rejected" ? (r.reason as Error).message : "rezolvat"))).toEqual([
+      "principal: 503 A; rezerva: 429 A",
+      "principal: 503 B; rezerva: 429 B",
+    ]);
+  });
+
+  it("nu trimite la rezerva un raspuns sosit dar fara factura (parsed null)", async () => {
+    const principal = new ModelCareRaspunde({ structuredResponse: raspuns(null, UZ) });
+    const rezerva = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ_REZERVA) });
+    const extrage = creeazaExtractor(principal, "principal", [{ model: rezerva, nume: "rezerva" }]);
+
+    await expect(extrage("text factura")).rejects.toThrow(/parsed/);
+    expect(rezerva.apeluri).toBe(0);
+  });
+
+  it("nu trimite la rezerva un raspuns care nu respecta schema", async () => {
+    const principal = new ModelCareRaspunde({ structuredResponse: raspuns({ ...FACTURA, total: "147.70" }, UZ) });
+    const rezerva = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ_REZERVA) });
+    const extrage = creeazaExtractor(principal, "principal", [{ model: rezerva, nume: "rezerva" }]);
+
+    await expect(extrage("text factura")).rejects.toThrow(/total/);
+    expect(rezerva.apeluri).toBe(0);
+  });
+
+  it("incearca rezervele in ordine si se opreste la prima care raspunde", async () => {
+    const principal = pica();
+    const prima = pica("503 prima rezerva");
+    const aDoua = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ_REZERVA) });
+    const aTreia = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ) });
+    const extrage = creeazaExtractor(principal, "principal", [
+      { model: prima, nume: "prima" },
+      { model: aDoua, nume: "a-doua" },
+      { model: aTreia, nume: "a-treia" },
+    ]);
+
+    expect(await extrage("text factura")).toMatchObject({ model: "a-doua", dinRezerva: true });
+    expect([principal.apeluri, prima.apeluri, aDoua.apeluri, aTreia.apeluri]).toEqual([1, 1, 1, 0]);
+  });
+
+  it("marcheaza raspunsul rezervei si cand rezerva are acelasi nume ca principalul", async () => {
+    const rezerva = new ModelCareRaspunde({ structuredResponse: raspuns(FACTURA, UZ) });
+    const extrage = creeazaExtractor(pica(), "acelasi-model", [{ model: rezerva, nume: "acelasi-model" }]);
+    expect(await extrage("text factura")).toMatchObject({ model: "acelasi-model", dinRezerva: true });
+  });
+
+  it("fara rezerve, raspunsul nu este al rezervei", async () => {
+    expect((await creeazaExtractor(modelFals(raspuns(FACTURA, UZ)), "principal")("text")).dinRezerva).toBe(false);
+  });
+
+  it("fara rezerve, eroarea principalului ajunge neschimbata la apelant", async () => {
+    const principal = pica("503 singur");
+    await expect(creeazaExtractor(principal, "principal")("text factura")).rejects.toThrow(/^503 singur$/);
   });
 });

@@ -70,6 +70,13 @@ describe("inCsv", () => {
     );
   });
 
+  it("pune ghilimele cand eroarea unei extrageri esuate contine virgula", () => {
+    const esuata: Problema = { cod: "extragere_esuata", mesaj: "extragere esuata: 503, high demand" };
+    expect(inCsv([{ fisier: "03.txt", factura: null, probleme: [esuata] }])).toBe(
+      ANTET + '03.txt,,,,,,,,de_verificat,"extragere esuata: 503, high demand"\n',
+    );
+  });
+
   it("pune ghilimele cand o problema contine virgula sau ghilimele", () => {
     const cui: Problema = { cod: "cui_format", mesaj: 'CUI "RO12,5" nu are formatul RO optional + 2-10 cifre' };
     expect(inCsv([{ fisier: "01.txt", factura: factura({ cui: "RO12,5" }), probleme: [cui] }])).toBe(

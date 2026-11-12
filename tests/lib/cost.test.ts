@@ -36,6 +36,10 @@ describe("pricingFor", () => {
     expect(pricingFor("gemini-3.5-flash-lite")).toEqual({ input: 0.3, output: 2.5 });
   });
 
+  it("pune pret pe gemini-3-flash-preview dupa randul gemini-3-flash, nu dupa gemini-3-flash-lite", () => {
+    expect(pricingFor("gemini-3-flash-preview")).toEqual({ input: 0.5, output: 3.0 });
+  });
+
   it("intoarce undefined pentru un model necunoscut", () => {
     expect(pricingFor("model-inexistent")).toBeUndefined();
   });

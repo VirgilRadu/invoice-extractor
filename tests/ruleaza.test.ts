@@ -7,6 +7,7 @@ import { FakeToolCallingModel } from "langchain";
 import { creeazaExtractor, type Extractor } from "../src/extractor.js";
 import type { Factura } from "../src/schema.js";
 import { ruleaza } from "../src/ruleaza.js";
+import { ModelCarePica, ModelCareRaspunde } from "./modele-false.js";
 
 // dotenv/config inlocuit: factory-ul ruleaza doar daca modulul e importat.
 const dotenv = vi.hoisted(() => ({ incarcat: false }));
@@ -37,7 +38,7 @@ function extractorDupaText(facturi: Record<string, Factura>): Extractor {
   return async (text) => {
     const factura = facturi[text];
     if (!factura) throw new Error(`text necunoscut: ${text}`);
-    return { factura: structuredClone(factura), tokeni: { intrare: 10, iesire: 5 }, latentaMs: 1, model: "model-fals" };
+    return { factura: structuredClone(factura), tokeni: { intrare: 10, iesire: 5 }, latentaMs: 1, model: "model-fals", dinRezerva: false };
   };
 }
 
@@ -154,7 +155,7 @@ describe("ruleaza", () => {
         "03.txt,Service Trei SRL,RO4293386O,2026-02-31,Ulei motor,1,1089.05,1.08905,de_verificat," +
         '"suma liniilor 1089.05 difera de total 1.08905; ' +
         'data ""2026-02-31"" nu este o data reala in formatul YYYY-MM-DD; ' +
-        'CUI ""RO4293386O"" nu are formatul RO optional + 2-10 cifre"\n',
+        'CUI ""RO4293386O"" nu are formatul RO optional + 2-10 cifre, prima diferita de 0"\n',
     );
     expect(log.mock.calls.map(([linie]) => linie)).toEqual([
       expect.stringMatching(/^01\.txt: 2 linii, .* -> ok$/),
@@ -272,6 +273,55 @@ describe("ruleaza", () => {
     });
 
     expect(asteapta).not.toHaveBeenCalled();
+  });
+
+  it("cu principalul picat si rezerva care raspunde, scrie CSV-ul ca si cum nimic nu s-ar fi intamplat", async () => {
+    await scrieFacturi({ "01.txt": "FACTURA 01" });
+    const principal = new ModelCarePica(new Error("503 Service Unavailable: high demand"));
+    const rezerva = new ModelCareRaspunde({
+      structuredResponse: {
+        raw: new AIMessage({ content: "", usage_metadata: { input_tokens: 300, output_tokens: 80, total_tokens: 380 } }),
+        parsed: FACTURA_UNU,
+      },
+    });
+    const log = vi.fn();
+
+    await ruleaza({
+      extrage: creeazaExtractor(principal, "gemini-3.5-flash-lite", [{ model: rezerva, nume: "gemini-3-flash-preview" }]),
+      dirIntrare: intrare,
+      fisierIesire: iesire,
+      log,
+      azi: AZI,
+    });
+
+    expect(await readFile(iesire, "utf8")).toBe(
+      ANTET +
+        "01.txt,Flori Unu SRL,RO45187325,2026-10-14,Ghiveci,2,45.5,147.7,ok,\n" +
+        "01.txt,Flori Unu SRL,RO45187325,2026-10-14,Pamant,3,18.9,147.7,ok,\n",
+    );
+    expect(log.mock.calls[0][0]).toMatch(/^01\.txt: 2 linii, tokeni 300 intrare \/ 80 iesire, \d+ ms \(gemini-3-flash-preview\) -> ok$/);
+    expect([principal.apeluri, rezerva.apeluri]).toEqual([1, 1]);
+  });
+
+  it("cand pica si principalul, si rezerva, randul CSV numeste ambele modele pe un singur rand", async () => {
+    await scrieFacturi({ "01.txt": "FACTURA 01" });
+    const principal = new ModelCarePica(new Error("[503 Service Unavailable] high demand"));
+    const rezerva = new ModelCarePica(new Error("[429 Too Many Requests] quota\n* Quota exceeded for metric"));
+    const log = vi.fn();
+
+    await ruleaza({
+      extrage: creeazaExtractor(principal, "gemini-3.5-flash-lite", [{ model: rezerva, nume: "gemini-3.1-flash-lite" }]),
+      dirIntrare: intrare,
+      fisierIesire: iesire,
+      log,
+      azi: AZI,
+    });
+
+    expect(await readFile(iesire, "utf8")).toBe(
+      ANTET +
+        "01.txt,,,,,,,,de_verificat,extragere esuata: gemini-3.5-flash-lite: [503 Service Unavailable] high demand; " +
+        "gemini-3.1-flash-lite: [429 Too Many Requests] quota * Quota exceeded for metric\n",
+    );
   });
 
   it("nu incarca dotenv/config la import", () => {

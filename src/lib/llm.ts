@@ -9,6 +9,8 @@
  * Toate adăugările Lab 3/4 sunt marcate cu [+ Lab 3/4]. Sunt ADITIVE — nimic din
  * ce funcționa în Lab 1-2 (chat, specializedchat, playground, reasoning) nu se schimbă.
  *
+ * [+ Tema 7] CreateModelOptions.model si .maxRetries, tot aditive (fara ele, nimic nu se schimba).
+ *
  *   - LLM_PROVIDER: "azureopenai" | "gemini" | "openai" | "anthropic" | "xai" | "ollama"
  *   - Azure: AZURE_OPENAI_* (5 variabile)
  *   - Gemini: GOOGLE_API_KEY + GEMINI_MODEL
@@ -125,6 +127,10 @@ export function getReasoningCapabilities(provider: LlmProvider): string {
  */
 export interface CreateModelOptions {
   reasoning?: boolean;
+  // [+ Tema 7] numele modelului, peste variabila de mediu / valoarea implicita a providerului
+  model?: string;
+  // [+ Tema 7] reincercarile bibliotecii (implicit 6, cu backoff); date constructorului doar cand sunt setate
+  maxRetries?: number;
 }
 
 /**
@@ -136,13 +142,15 @@ export function createModel(
   options: CreateModelOptions = {},
 ): BaseChatModel {
   const reasoning = options.reasoning ?? false;
+  // [+ Tema 7]
+  const reincercari = options.maxRetries === undefined ? {} : { maxRetries: options.maxRetries };
 
   //  bazat pe provider, citim variabilele necesare și construim modelul corespunzător.
   switch (provider) {
     case "azureopenai": {
       const apiKey = process.env.AZURE_OPENAI_API_KEY;
       const instanceName = process.env.AZURE_OPENAI_API_INSTANCE_NAME;
-      const deploymentName = process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME;
+      const deploymentName = options.model ?? process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME; // [+ Tema 7] options.model
       const apiVersion = process.env.AZURE_OPENAI_API_VERSION;
       const basePath = process.env.AZURE_OPENAI_BASE_PATH;
 
@@ -179,6 +187,7 @@ export function createModel(
         ...(basePath ? { azureOpenAIBasePath: basePath } : {}),
         ...reasoningConfig,
         modelKwargs: { [tokenLimitKey]: MAX_OUTPUT_TOKENS },
+        ...reincercari, // [+ Tema 7]
       }) as unknown as BaseChatModel;
     }
 
@@ -189,7 +198,7 @@ export function createModel(
           "GOOGLE_API_KEY lipsă. Source ~/.llm_gemini sau setează în .env.local.",
         );
       }
-      const modelName = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
+      const modelName = options.model ?? process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite"; // [+ Tema 7] options.model
       return new ChatGoogleGenerativeAI({
         apiKey,
         model: modelName,
@@ -202,6 +211,7 @@ export function createModel(
               thinkingConfig: { includeThoughts: true, thinkingBudget: -1 },
             }
           : {}),
+        ...reincercari, // [+ Tema 7]
       }) as unknown as BaseChatModel;
     }
 
@@ -212,7 +222,7 @@ export function createModel(
           "OPENAI_API_KEY lipsă. Setează-l în .env.local sau ~/.llm_openai.",
         );
       }
-      const modelName = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+      const modelName = options.model ?? process.env.OPENAI_MODEL ?? "gpt-4o-mini"; // [+ Tema 7] options.model
       // Reasoning summaries doar pentru modele de reasoning (gpt-5 / o-series).
       const reasoningConfig =
         reasoning && isReasoningDeployment(modelName)
@@ -228,6 +238,7 @@ export function createModel(
         apiKey,
         model: modelName,
         ...reasoningConfig,
+        ...reincercari, // [+ Tema 7]
       }) as unknown as BaseChatModel;
     }
 
@@ -238,7 +249,7 @@ export function createModel(
           "ANTHROPIC_API_KEY lipsă. Setează-l în .env.local sau ~/.llm_anthropic.",
         );
       }
-      const modelName = process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5";
+      const modelName = options.model ?? process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5"; // [+ Tema 7] options.model
       return new ChatAnthropic({
         apiKey,
         model: modelName,
@@ -252,6 +263,7 @@ export function createModel(
               },
             }
           : {}),
+        ...reincercari, // [+ Tema 7]
       }) as unknown as BaseChatModel;
     }
 
@@ -262,12 +274,13 @@ export function createModel(
           "XAI_API_KEY lipsă. Setează-l în .env.local sau ~/.llm_xai.",
         );
       }
-      const modelName = process.env.XAI_MODEL ?? "grok-4.5";
+      const modelName = options.model ?? process.env.XAI_MODEL ?? "grok-4.5"; // [+ Tema 7] options.model
       // we use the OpenAI-compatible API, so we can use ChatOpenAI class
       return new ChatOpenAI({
         apiKey,
         model: modelName,
         configuration: { baseURL: "https://api.x.ai/v1" },
+        ...reincercari, // [+ Tema 7]
       }) as unknown as BaseChatModel;
     }
 
@@ -277,10 +290,11 @@ export function createModel(
       // Nu cere cheie API: trebuie doar `ollama serve` pornit și modelul pull-uit
       // (`ollama pull qwen3:8b`). De-aia e plasa ideală de fallback.
       // Notă: reasoning-ul nu e cablat aici (depinde de model); îl lăsăm implicit.
-      const modelName = process.env.OLLAMA_MODEL ?? "qwen3:8b";
+      const modelName = options.model ?? process.env.OLLAMA_MODEL ?? "qwen3:8b"; // [+ Tema 7] options.model
       return new ChatOllama({
         model: modelName,
         baseUrl: process.env.OLLAMA_BASE_URL ?? "http://localhost:11434",
+        ...reincercari, // [+ Tema 7]
       }) as unknown as BaseChatModel;
       // Alternativă (endpoint OpenAI-compatible — Ollama sau LM Studio):
       //   return new ChatOpenAI({

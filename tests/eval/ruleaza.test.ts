@@ -2,11 +2,13 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Extractor, RezultatExtragere } from "../../src/extractor.js";
+import { AIMessage } from "@langchain/core/messages";
+import { creeazaExtractor, type Extractor, type RezultatExtragere } from "../../src/extractor.js";
 import type { Factura } from "../../src/schema.js";
 import type { CodValidare } from "../../src/validare.js";
 import { raportEval } from "../../src/eval/raport.js";
 import { DATA_REFERINTA_SET, ruleaza, ruleazaEval, type OptiuniEval } from "../../src/eval/ruleaza.js";
+import { ModelCarePica, ModelCareRaspunde } from "../modele-false.js";
 
 // dotenv/config inlocuit: factory-ul ruleaza doar daca modulul e importat.
 const dotenv = vi.hoisted(() => ({ incarcat: false }));
@@ -62,7 +64,7 @@ function extractorDupaText(facturi: Record<string, Factura>): Extractor & { text
     texte.push(text);
     const factura = facturi[text];
     if (!factura) throw new Error(`text necunoscut: ${text}`);
-    return { factura: structuredClone(factura), tokeni: { intrare: 10, iesire: 5 }, latentaMs: 1, model: "model-fals" };
+    return { factura: structuredClone(factura), tokeni: { intrare: 10, iesire: 5 }, latentaMs: 1, model: "model-fals", dinRezerva: false };
   };
   return Object.assign(extrage, { texte });
 }
@@ -191,7 +193,7 @@ describe("ruleazaEval", () => {
       evenimente.push(`start ${text}`);
       await new Promise((rezolva) => setTimeout(rezolva, 20));
       evenimente.push(`gata ${text}`);
-      return { factura: structuredClone(facturi[text]), tokeni: { intrare: 1, iesire: 1 }, latentaMs: 1, model: "m" };
+      return { factura: structuredClone(facturi[text]), tokeni: { intrare: 1, iesire: 1 }, latentaMs: 1, model: "m", dinRezerva: false };
     };
 
     await ruleazaEval({
@@ -220,9 +222,10 @@ describe("ruleazaEval", () => {
   });
 
   describe("tokeni, latenta si cost", () => {
+    const LITE = "gemini-3.5-flash-lite";
     const RASPUNSURI: Record<string, Omit<RezultatExtragere, "factura">> = {
-      "TEXT UNU": { tokeni: { intrare: 1000, iesire: 200 }, latentaMs: 1500, model: "gemini-3.5-flash-lite" },
-      "TEXT DOI": { tokeni: { intrare: 2000, iesire: 400 }, latentaMs: 2500, model: "gemini-3.5-flash-lite" },
+      "TEXT UNU": { tokeni: { intrare: 1000, iesire: 200 }, latentaMs: 1500, model: LITE, dinRezerva: false },
+      "TEXT DOI": { tokeni: { intrare: 2000, iesire: 400 }, latentaMs: 2500, model: LITE, dinRezerva: false },
     };
     const extrage: Extractor = async (text) => {
       const factura = { "TEXT UNU": UNU, "TEXT DOI": DOI }[text];
@@ -245,6 +248,7 @@ describe("ruleazaEval", () => {
           tokeni: { intrare: 1000, iesire: 200 },
           latentaMs: 1500,
           model: "gemini-3.5-flash-lite",
+          dinRezerva: false,
           cost: expect.closeTo((1000 * 0.3 + 200 * 2.5) / 1_000_000, 15),
         },
         {
@@ -254,6 +258,7 @@ describe("ruleazaEval", () => {
           tokeni: { intrare: 0, iesire: 0 },
           latentaMs: null,
           model: null,
+          dinRezerva: false,
           cost: 0,
         },
         {
@@ -263,6 +268,7 @@ describe("ruleazaEval", () => {
           tokeni: { intrare: 2000, iesire: 400 },
           latentaMs: 2500,
           model: "gemini-3.5-flash-lite",
+          dinRezerva: false,
           cost: expect.closeTo((2000 * 0.3 + 400 * 2.5) / 1_000_000, 15),
         },
       ]);
@@ -282,7 +288,7 @@ describe("ruleazaEval", () => {
       await scrie("01", "TEXT UNU", UNU);
       await scrie("02", "TEXT DOI", DOI);
       const fisierIesire = join(dir, "rezultate", "eval.md");
-      const meta = { model: "gemini-3.5-flash-lite", dataRulare: "2026-11-12" };
+      const meta = { principal: "gemini-3.5-flash-lite", rezerva: null, dataRulare: "2026-11-12" };
 
       const { sumar, consum, validare } = await ruleaza({
         extrage,
@@ -392,6 +398,60 @@ describe("ruleazaEval", () => {
     it("foloseste pentru setul de date data de referinta fixa 2026-11-12", () => {
       expect(DATA_REFERINTA_SET).toBe("2026-11-12");
     });
+  });
+
+  it("arunca la o data de referinta invalida inainte de orice extragere", async () => {
+    await scrie("01", "TEXT UNU", UNU);
+    const extrage = extractorDupaText({ "TEXT UNU": UNU });
+
+    for (const gresita of ["2026-02-30", "12.11.2026"]) {
+      await expect(ruleazaEval(optiuni(extrage, { dataReferinta: gresita }))).rejects.toThrow(gresita);
+    }
+    expect(extrage.texte).toEqual([]);
+  });
+
+  it("numeste in log modelul care a raspuns", async () => {
+    await scrie("01", "TEXT UNU", UNU);
+    const log = vi.fn();
+    await ruleazaEval(optiuni(extractorDupaText({ "TEXT UNU": UNU }), { log }));
+    expect(log.mock.calls[0][0]).toMatch(/^01\.txt: 11\/11 controale corecte, model model-fals, tokeni /);
+  });
+
+  it("cu principalul picat si rezerva care raspunde, raportul arata rezultatele rezervei si modelul ei", async () => {
+    await scrie("01", "TEXT UNU", UNU);
+    const principal = new ModelCarePica(new Error("503 Service Unavailable: high demand"));
+    const rezerva = new ModelCareRaspunde({
+      structuredResponse: {
+        raw: new AIMessage({ content: "", usage_metadata: { input_tokens: 1000, output_tokens: 200, total_tokens: 1200 } }),
+        parsed: UNU,
+      },
+    });
+    const fisierIesire = join(dir, "rezultate", "eval.md");
+    const log = vi.fn();
+
+    const { sumar, consum, validare } = await ruleaza({
+      ...optiuni(creeazaExtractor(principal, "gemini-3.5-flash-lite", [{ model: rezerva, nume: "gemini-3-flash-preview" }]), {
+        log,
+      }),
+      fisierIesire,
+      principal: "gemini-3.5-flash-lite",
+      rezerva: "gemini-3-flash-preview",
+      dataRulare: "2026-11-12",
+    });
+
+    expect(sumar).toMatchObject({ facturi: 1, facturiComplete: 1, corecte: 11, totalControale: 11 });
+    expect(validare).toMatchObject({ corecteOk: 1, potrivite: 1 });
+    expect(consum.facturi[0]).toMatchObject({
+      model: "gemini-3-flash-preview",
+      dinRezerva: true,
+      tokeni: { intrare: 1000, iesire: 200 },
+    });
+    expect(log.mock.calls[0][0]).toMatch(/^01\.txt: 11\/11 controale corecte, model gemini-3-flash-preview, /);
+    const raport = await readFile(fisierIesire, "utf8");
+    expect(raport).toContain("| 01.txt | gemini-3-flash-preview | 11/11 | 1000 | 200 |");
+    expect(raport).toContain("- Facturi la care a raspuns rezerva (gemini-3-flash-preview): 1 din 1 extrase\n");
+    // 1000 x 0.50 + 200 x 3.00 = 1100 / 1M tokeni, pretul rezervei
+    expect(raport).toContain("- Cost total: $0.001100\n");
   });
 
   it("nu incarca dotenv/config la import", () => {
