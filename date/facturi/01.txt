@@ -1,0 +1,22 @@
+                         FACTURĂ FISCALĂ
+                    Seria AVF nr. 000417
+                 Data emiterii: 14.10.2026
+
+Furnizor: ATELIERUL VERDE FLORAL S.R.L.
+CUI: RO45187325
+Nr. Reg. Com.: J12/2318/2021
+Sediu: Str. Teilor nr. 7, Cluj-Napoca, jud. Cluj
+
+Cumpărător: CASA CU LALELE S.R.L.
+Adresa: Bd. Primăverii nr. 21, Brașov, jud. Brașov
+
+Nr. | Denumire produs              | U.M. | Cant. | Preț unitar (cu TVA) | Valoare (cu TVA)
+----+------------------------------+------+-------+----------------------+-----------------
+ 1  | Ghiveci ceramic 20 cm        | buc  |   2   |        45,50         |      91,00
+ 2  | Pământ pentru flori 10 l     | sac  |   3   |        18,90         |      56,70
+ 3  | Orhidee Phalaenopsis albă    | buc  |   1   |        89,99         |      89,99
+
+                                        Total de plată (lei):       237,69
+                                        din care TVA 21%:            41,25
+
+Termen de plată: 30 de zile de la emitere.
