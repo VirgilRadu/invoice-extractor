@@ -1,0 +1,20 @@
+FURNIZOR                                    CLIENT
+TAMPLARIA LEMN DE STEJAR S.R.L.             APARTAMENT NOU DESIGN S.R.L.
+CUI: 33484829                               CUI: RO14968997
+Reg. Com.: J26/518/2014                     Reg. Com.: J26/2290/2019
+Str. Gheorghe Doja nr. 120, Targu Mures     Str. Bolyai nr. 8, Targu Mures
+
+                    FACTURA FISCALA Nr. TLS 1144
+                    Data emiterii: 15 decembrie 2026
+                    Comanda nr. 87 / Proces-verbal montaj nr. 87
+
+Nr | Denumire                          | U.M. | Cant. | Pret unitar | Valoare
+   |                                   |      |       | cu TVA      | cu TVA
+ 1 | Usa interior stejar masiv 80 cm   | buc  | 2     | 1.450,00    | 2.900,00
+ 2 | Toc reglabil 100-120 mm           | buc  | 2     | 385,00      | 770,00
+ 3 | Montaj usa                        | buc  | 2     | 250,00      | 500,00
+ 4 | Balamale alama, set 3 buc         | set  | 2     | 64,90       | 129,80
+
+                              Total fara TVA:   3.578,35 lei
+                              TVA 21%:            751,45 lei
+                              Total de plata:   4.329,80 lei

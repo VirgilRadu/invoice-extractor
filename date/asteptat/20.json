@@ -1,0 +1,28 @@
+{
+  "furnizor": "TAMPLARIA LEMN DE STEJAR S.R.L.",
+  "cui": "33484829",
+  "data": "2026-12-15",
+  "linii": [
+    {
+      "produs": "Usa interior stejar masiv 80 cm",
+      "cantitate": 2,
+      "pret": 1450
+    },
+    {
+      "produs": "Toc reglabil 100-120 mm",
+      "cantitate": 2,
+      "pret": 385
+    },
+    {
+      "produs": "Montaj usa",
+      "cantitate": 2,
+      "pret": 250
+    },
+    {
+      "produs": "Balamale alama, set 3 buc",
+      "cantitate": 2,
+      "pret": 64.9
+    }
+  ],
+  "total": 4329.8
+}

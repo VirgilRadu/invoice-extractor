@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { sumarEval } from "../../src/eval/compara.js";
 import { sumarConsum, type ConsumFactura } from "../../src/eval/consum.js";
-import { raportEval, tabelCampuri } from "../../src/eval/raport.js";
+import { raportEval, sectiuneValidare, tabelCampuri } from "../../src/eval/raport.js";
+import { sumarValidare } from "../../src/eval/validare.js";
 import type { Factura } from "../../src/schema.js";
 
 const FACTURA: Factura = {
@@ -36,6 +37,34 @@ const RANDURI: ConsumFactura[] = [
 ];
 const CONSUM = sumarConsum(RANDURI);
 const META = { model: LITE, dataRulare: "2026-11-12" };
+
+// Aceleasi 3 facturi: 01 lasata ok, 02 corecta dar semnalata dupa o citire gresita, 03 gresita si esuata.
+const VALIDARE = sumarValidare(
+  [
+    { fisier: "01.txt", asteptate: [], obtinute: [] },
+    { fisier: "02.txt", asteptate: [], obtinute: ["cui_cifra_control"] },
+    { fisier: "03.txt", asteptate: ["suma_diferita"], obtinute: null },
+  ],
+  "2026-11-12",
+);
+
+const SECTIUNE_VALIDARE = [
+  "## Validare",
+  "",
+  "- Data de referinta: 2026-11-12, fixa pentru setul de date, ca codurile asteptate sa ramana adevarate " +
+    "oricand ar fi rulat eval-ul (pnpm start foloseste data curenta)",
+  "- Facturi gresite semnalate: 0 din 1",
+  "- Facturi corecte lasate ok: 1 din 2",
+  "- Facturi cu exact codurile asteptate: 1 din 3",
+  "- O factura corecta semnalata are o valoare extrasa gresit, prinsa de validare. " +
+    "O extragere esuata nu este numarata nici semnalata, nici ok.",
+  "",
+  "| Fisier | Coduri asteptate | Coduri obtinute | Rezultat |",
+  "|---|---|---|---|",
+  "| 01.txt | - | - | corecta, lasata ok |",
+  "| 02.txt | - | cui_cifra_control | corecta, semnalata: validarea a prins o valoare extrasa gresit |",
+  "| 03.txt | suma_diferita | n/a | extragere esuata, nevalidata |",
+].join("\n");
 
 // 01: 1000 x 0.30 + 200 x 2.50 = 800 / 1M; 02: 2000 x 0.30 + 400 x 2.50 = 1600 / 1M; medie pe 2 extrase.
 const SECTIUNE_COST = [
@@ -77,7 +106,7 @@ describe("tabelCampuri", () => {
 
 describe("raportEval", () => {
   it("scrie raportul complet", () => {
-    expect(raportEval(SUMAR, CONSUM, META)).toBe(
+    expect(raportEval(SUMAR, CONSUM, VALIDARE, META)).toBe(
       [
         "# Eval extractor facturi",
         "",
@@ -90,6 +119,8 @@ describe("raportEval", () => {
         "## Acuratete pe camp",
         "",
         TABEL,
+        "",
+        SECTIUNE_VALIDARE,
         "",
         SECTIUNE_COST,
         "",
@@ -107,21 +138,21 @@ describe("raportEval", () => {
 
   it("scrie o linie lipsa ca valoare absenta si textul cu ghilimele escapate", () => {
     const sumar = sumarEval([{ fisier: "04.txt", asteptat: FACTURA, obtinut: { ...FACTURA, linii: [FACTURA.linii[0]] } }]);
-    const raport = raportEval(sumar, sumarConsum([RANDURI[0]]), META);
+    const raport = raportEval(sumar, sumarConsum([RANDURI[0]]), VALIDARE, META);
     expect(raport).toContain("  - linii: asteptat 2, obtinut 1\n");
     expect(raport).toContain('  - linia 2, produs: asteptat "Paine \\"Casa\\"", obtinut lipsa\n');
   });
 
   it("scrie o eroare pe mai multe randuri pe un singur rand", () => {
     const sumar = sumarEval([{ fisier: "05.txt", asteptat: FACTURA, eroare: "schema:\n  total lipseste" }]);
-    expect(raportEval(sumar, sumarConsum([RANDURI[2]]), META)).toContain(
+    expect(raportEval(sumar, sumarConsum([RANDURI[2]]), VALIDARE, META)).toContain(
       "- 05.txt: extragere esuata: schema: total lipseste\n",
     );
   });
 
   it("spune ca pretul e necunoscut cand modelul nu are rand in cost.ts, in loc de un cost 0", () => {
     const randuri = RANDURI.map((r) => (r.model === null ? r : { ...r, model: "model-fals" }));
-    const raport = raportEval(SUMAR, sumarConsum(randuri), { model: "model-fals", dataRulare: "2026-11-12" });
+    const raport = raportEval(SUMAR, sumarConsum(randuri), VALIDARE, { model: "model-fals", dataRulare: "2026-11-12" });
     expect(raport).toContain("- Cost total: pret necunoscut\n");
     expect(raport).toContain("- Cost mediu pe factura extrasa: pret necunoscut (2 extrase din 3)\n");
     expect(raport).toContain("- Pret folosit pentru model-fals: necunoscut, modelul nu are rand in src/lib/cost.ts\n");
@@ -130,8 +161,32 @@ describe("raportEval", () => {
   });
 
   it("scrie liniuta la cost mediu si latenta cand toate extragerile au esuat", () => {
-    const raport = raportEval(SUMAR, sumarConsum([RANDURI[2]]), META);
+    const raport = raportEval(SUMAR, sumarConsum([RANDURI[2]]), VALIDARE, META);
     expect(raport).toContain("- Cost mediu pe factura extrasa: - (0 extrase din 1)\n");
     expect(raport).toContain("- Latenta medie: -, maxima: - (doar extragerile reusite)\n");
+  });
+});
+
+describe("sectiuneValidare", () => {
+  it("scrie fiecare verdict cu codurile asteptate si obtinute, in ordinea fisierelor", () => {
+    const validare = sumarValidare(
+      [
+        { fisier: "14.txt", asteptate: [], obtinute: ["suma_diferita"] },
+        { fisier: "16.txt", asteptate: ["suma_diferita"], obtinute: ["suma_diferita"] },
+        { fisier: "19.txt", asteptate: ["cui_format"], obtinute: ["cui_cifra_control"] },
+        { fisier: "20.txt", asteptate: ["suma_diferita", "data_in_viitor"], obtinute: [] },
+      ],
+      "2026-11-12",
+    );
+    const sectiune = sectiuneValidare(validare);
+    expect(sectiune).toContain("- Facturi gresite semnalate: 2 din 3\n");
+    expect(sectiune).toContain("- Facturi corecte lasate ok: 0 din 1\n");
+    expect(sectiune).toContain("- Facturi cu exact codurile asteptate: 1 din 4\n");
+    expect(sectiune.split("\n").slice(-4)).toEqual([
+      "| 14.txt | - | suma_diferita | corecta, semnalata: validarea a prins o valoare extrasa gresit |",
+      "| 16.txt | suma_diferita | suma_diferita | gresita, semnalata cu codurile asteptate |",
+      "| 19.txt | cui_format | cui_cifra_control | gresita, semnalata cu alte coduri |",
+      "| 20.txt | suma_diferita, data_in_viitor | - | gresita, nesemnalata |",
+    ]);
   });
 });

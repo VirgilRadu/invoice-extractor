@@ -1,6 +1,7 @@
 import { formatCost, pricingFor } from "../lib/cost.js";
 import { CONTROALE_FACTURA, CONTROALE_LINIE, type Esec, type SumarEval } from "./compara.js";
 import type { SumarConsum } from "./consum.js";
+import type { SumarValidare, VerdictValidare } from "./validare.js";
 
 export type MetaRaport = { model: string; dataRulare: string };
 
@@ -59,7 +60,47 @@ export function sectiuneCost(consum: SumarConsum, model: string): string {
   ].join("\n");
 }
 
-export function raportEval(sumar: SumarEval, consum: SumarConsum, { model, dataRulare }: MetaRaport): string {
+const VERDICTE: Record<VerdictValidare, string> = {
+  corecta_ok: "corecta, lasata ok",
+  corecta_semnalata: "corecta, semnalata: validarea a prins o valoare extrasa gresit",
+  gresita_coduri_asteptate: "gresita, semnalata cu codurile asteptate",
+  gresita_alte_coduri: "gresita, semnalata cu alte coduri",
+  gresita_nesemnalata: "gresita, nesemnalata",
+  extragere_esuata: "extragere esuata, nevalidata",
+};
+
+// null = extragere esuata, deci nimic validat; lista goala = factura ok.
+const listaCoduri = (coduri: string[] | null) =>
+  coduri === null ? "n/a" : coduri.length === 0 ? "-" : coduri.join(", ");
+
+export function sectiuneValidare(validare: SumarValidare): string {
+  const randuri = validare.facturi.map(
+    ({ fisier, asteptate, obtinute, verdict }) =>
+      `| ${fisier} | ${listaCoduri(asteptate)} | ${listaCoduri(obtinute)} | ${VERDICTE[verdict]} |`,
+  );
+  return [
+    "## Validare",
+    "",
+    `- Data de referinta: ${validare.dataReferinta}, fixa pentru setul de date, ca codurile asteptate sa ramana ` +
+      "adevarate oricand ar fi rulat eval-ul (pnpm start foloseste data curenta)",
+    `- Facturi gresite semnalate: ${validare.gresiteSemnalate} din ${validare.gresite}`,
+    `- Facturi corecte lasate ok: ${validare.corecteOk} din ${validare.corecte}`,
+    `- Facturi cu exact codurile asteptate: ${validare.potrivite} din ${validare.total}`,
+    "- O factura corecta semnalata are o valoare extrasa gresit, prinsa de validare. " +
+      "O extragere esuata nu este numarata nici semnalata, nici ok.",
+    "",
+    "| Fisier | Coduri asteptate | Coduri obtinute | Rezultat |",
+    "|---|---|---|---|",
+    ...randuri,
+  ].join("\n");
+}
+
+export function raportEval(
+  sumar: SumarEval,
+  consum: SumarConsum,
+  validare: SumarValidare,
+  { model, dataRulare }: MetaRaport,
+): string {
   const facturi = sumar.detalii.flatMap(({ fisier, eroare, esecuri }) => {
     if (eroare !== undefined) return [`- ${fisier}: extragere esuata: ${eroare.replace(/\s+/g, " ").trim()}`];
     if (esecuri.length === 0) return [`- ${fisier}: toate controalele corecte`];
@@ -77,6 +118,8 @@ export function raportEval(sumar: SumarEval, consum: SumarConsum, { model, dataR
     "## Acuratete pe camp",
     "",
     tabelCampuri(sumar),
+    "",
+    sectiuneValidare(validare),
     "",
     sectiuneCost(consum, model),
     "",

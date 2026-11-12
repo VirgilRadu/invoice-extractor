@@ -1,0 +1,28 @@
+{
+  "furnizor": "PET SHOP LABUTE VESELE S.R.L.",
+  "cui": "RO36448332",
+  "data": "2026-10-21",
+  "linii": [
+    {
+      "produs": "Hrana uscata caini adulti 12 kg",
+      "cantitate": 1,
+      "pret": 239.9
+    },
+    {
+      "produs": "Nisip pisici bentonita 10 l",
+      "cantitate": 3,
+      "pret": 34.5
+    },
+    {
+      "produs": "Zgarda reglabila nylon M",
+      "cantitate": 2,
+      "pret": 27.8
+    },
+    {
+      "produs": "Recompense dentare caini, 7 buc",
+      "cantitate": 4,
+      "pret": 18.25
+    }
+  ],
+  "total": 427
+}

@@ -1,0 +1,23 @@
+                         FACTURĂ FISCALĂ
+                    Seria LBV nr. 002093
+                 Data emiterii: 21.10.2026
+
+Furnizor: PET SHOP LABUTE VESELE S.R.L.
+CUI: RO36448332
+Nr. Reg. Com.: J22/1876/2016
+Sediu: Str. Pacurari nr. 44, Iași, jud. Iași
+
+Cumpărător: CABINET VETERINAR BLANITA S.R.L.
+Adresa: Str. Sararie nr. 3, Iași, jud. Iași
+
+Nr. | Denumire produs                    | U.M.  | Cant. | Preț unitar (cu TVA) | Valoare (cu TVA)
+----+------------------------------------+-------+-------+----------------------+-----------------
+ 1  | Hrana uscata caini adulti 12 kg    | buc   |   1   |       239,90         |      239,90
+ 2  | Nisip pisici bentonita 10 l        | sac   |   3   |        34,50         |      103,50
+ 3  | Zgarda reglabila nylon M           | buc   |   2   |        27,80         |       55,60
+ 4  | Recompense dentare caini, 7 buc    | pach. |   4   |        18,25         |       73,00
+
+                                        Total de plată (lei):       427,00
+                                        din care TVA 21%:            74,11
+
+Termen de plată: 15 zile de la emitere.

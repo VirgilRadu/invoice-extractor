@@ -108,7 +108,7 @@ flowchart TD
 - **CSV:** one row per line item, invoice fields repeated: `fisier, furnizor, cui, data, produs, cantitate, pret, total, status, probleme`. Fields containing `,` `"` or a newline are quoted, `"` doubled.
 - **Data:** 15 correct synthetic invoices and receipts in varied layouts, plus 5 with a planted fault (wrong sum, impossible date, bad CUI). Expected values record what the document says, faults included.
 - **Files:** invoices are named with zero-padded numbers (`01.txt` ... `20.txt`); the same number names the expected values and the PDF.
-- **Failures:** `pnpm start` stops at the first failed extraction and names the file. `pnpm eval` records the failure, counts every field of that invoice as wrong, and continues.
+- **Failures:** `pnpm start` continues past a failed extraction: that invoice gets one CSV row with only `fisier`, status `de_verificat` and `extragere esuata: <first line of the error>` in `probleme`. `pnpm eval` records the failure, counts every field of that invoice as wrong, and continues.
 - **Eval:** a field is correct when it equals the expected value after normalisation (case and spaces for text, `RO` prefix for CUI, 0.01 for amounts). Reported: accuracy per field, invoices fully correct, and whether the flagged set equals the expected flagged set.
 
 ## 5. Slices
@@ -122,7 +122,7 @@ Each slice is test-first and ends in a command that shows the result.
 | 2 | 15 invoices + expected values + compare | `pnpm eval` prints accuracy per field | done |
 | 3 | Tokens, cost, latency in the eval report | `rezultate/eval.md` has the cost table | done |
 | | **Minim** — tag `minim` | | |
-| 4 | Validation rules, `de_verificat`, 5 faulty invoices, `pnpm start` continues past a failed extraction | rule tests, offline only (live runs wait for slice 5) | todo |
+| 4 | Validation rules, `de_verificat`, 5 faulty invoices, `pnpm start` continues past a failed extraction | rule tests, offline only (live runs wait for slice 5) | done |
 | 5 | `withFallbacks` (primary `gemini-3.5-flash-lite`, reserve `gemini-3-flash-preview`), answering model per invoice in the report | offline test: primary throws, reserve answers; then live `pnpm eval` and `pnpm start` on all 20 | todo |
 | | **Bun** — tag `bun` | | |
 | 6 | PDF input with `pdfjs-dist` | eval on the PDF copies | todo |

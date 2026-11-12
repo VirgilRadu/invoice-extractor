@@ -1,0 +1,28 @@
+{
+  "furnizor": "LIBRARIA PAGINA ALBASTRA SRL",
+  "cui": "32014314",
+  "data": "2026-02-31",
+  "linii": [
+    {
+      "produs": "CAIET A4 MATEMATICA 80 FILE",
+      "cantitate": 5,
+      "pret": 6.2
+    },
+    {
+      "produs": "PIX GEL ALBASTRU 0,5 MM",
+      "cantitate": 3,
+      "pret": 4.75
+    },
+    {
+      "produs": "ACUARELE 12 CULORI",
+      "cantitate": 1,
+      "pret": 22.9
+    },
+    {
+      "produs": "BLOC DESEN A3 20 FILE",
+      "cantitate": 2,
+      "pret": 9.4
+    }
+  ],
+  "total": 86.95
+}

@@ -1,0 +1,23 @@
+{
+  "furnizor": "CURATATORIA ECO PRESTIGE S.R.L.",
+  "cui": "RO27219604",
+  "data": "2026-10-28",
+  "linii": [
+    {
+      "produs": "Spalare si calcare lenjerie pat, set",
+      "cantitate": 40,
+      "pret": 18.5
+    },
+    {
+      "produs": "Curatare chimica perdele",
+      "cantitate": 12.5,
+      "pret": 22
+    },
+    {
+      "produs": "Spalare prosoape",
+      "cantitate": 120,
+      "pret": 3.4
+    }
+  ],
+  "total": 1423
+}

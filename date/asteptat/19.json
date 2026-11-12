@@ -1,0 +1,23 @@
+{
+  "furnizor": "OLARIA CU SUFLET S.R.L.",
+  "cui": "RO47840799123",
+  "data": "2026-10-16",
+  "linii": [
+    {
+      "produs": "Cana ceramica pictata manual",
+      "cantitate": 6,
+      "pret": 42
+    },
+    {
+      "produs": "Platou servire 30 cm",
+      "cantitate": 2,
+      "pret": 118.5
+    },
+    {
+      "produs": "Atelier modelaj lut, participant",
+      "cantitate": 3,
+      "pret": 95
+    }
+  ],
+  "total": 774
+}

@@ -4,8 +4,9 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Extractor, RezultatExtragere } from "../../src/extractor.js";
 import type { Factura } from "../../src/schema.js";
+import type { CodValidare } from "../../src/validare.js";
 import { raportEval } from "../../src/eval/raport.js";
-import { ruleaza, ruleazaEval } from "../../src/eval/ruleaza.js";
+import { DATA_REFERINTA_SET, ruleaza, ruleazaEval, type OptiuniEval } from "../../src/eval/ruleaza.js";
 
 // dotenv/config inlocuit: factory-ul ruleaza doar daca modulul e importat.
 const dotenv = vi.hoisted(() => ({ incarcat: false }));
@@ -17,11 +18,16 @@ vi.mock("dotenv/config", () => {
 let dir: string;
 let dirFacturi: string;
 let dirAsteptat: string;
+let fisierCoduriAsteptate: string;
+let coduri: Record<string, CodValidare[]>;
+const dataReferinta = "2026-11-12";
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), "eval-"));
   dirFacturi = join(dir, "facturi");
   dirAsteptat = join(dir, "asteptat");
+  fisierCoduriAsteptate = join(dir, "asteptat-validare.json");
+  coduri = {};
   await mkdir(dirFacturi);
   await mkdir(dirAsteptat);
 });
@@ -61,9 +67,17 @@ function extractorDupaText(facturi: Record<string, Factura>): Extractor & { text
   return Object.assign(extrage, { texte });
 }
 
-async function scrie(nume: string, text: string, asteptat: Factura | string) {
+// Optiunile comune ale eval-ului; testul da extractorul si ce schimba fata de ele.
+function optiuni(extrage: Extractor, alte: Partial<OptiuniEval> = {}): OptiuniEval {
+  return { extrage, dirFacturi, dirAsteptat, fisierCoduriAsteptate, dataReferinta, pauzaMs: 0, log: vi.fn(), ...alte };
+}
+
+// Scrie factura, valoarea asteptata si codurile de validare asteptate pentru ea.
+async function scrie(nume: string, text: string, asteptat: Factura | string, asteptateLaValidare: CodValidare[] = []) {
   await writeFile(join(dirFacturi, `${nume}.txt`), text);
   await writeFile(join(dirAsteptat, `${nume}.json`), typeof asteptat === "string" ? asteptat : JSON.stringify(asteptat));
+  coduri[nume] = asteptateLaValidare;
+  await writeFile(fisierCoduriAsteptate, JSON.stringify(coduri));
 }
 
 describe("ruleazaEval", () => {
@@ -72,7 +86,7 @@ describe("ruleazaEval", () => {
     await scrie("02", "TEXT DOI", DOI);
     const extrage = extractorDupaText({ "TEXT UNU": UNU, "TEXT DOI": { ...DOI, total: 30 } });
 
-    const { sumar } = await ruleazaEval({ extrage, dirFacturi, dirAsteptat, pauzaMs: 0, log: vi.fn() });
+    const { sumar } = await ruleazaEval(optiuni(extrage));
 
     expect(extrage.texte).toEqual(["TEXT UNU", "TEXT DOI"]);
     expect(sumar.facturi).toBe(2);
@@ -91,7 +105,7 @@ describe("ruleazaEval", () => {
     const extrage = extractorDupaText({ "TEXT DOI": DOI });
     const log = vi.fn();
 
-    const { sumar } = await ruleazaEval({ extrage, dirFacturi, dirAsteptat, pauzaMs: 0, log });
+    const { sumar } = await ruleazaEval(optiuni(extrage, { log }));
 
     expect(extrage.texte).toEqual(["TEXT STRICAT", "TEXT DOI"]);
     expect(sumar.detalii[0]).toEqual({ fisier: "01.txt", eroare: "text necunoscut: TEXT STRICAT", esecuri: [] });
@@ -108,25 +122,19 @@ describe("ruleazaEval", () => {
     await writeFile(join(dirFacturi, "02.txt"), "TEXT DOI");
     const extrage = extractorDupaText({ "TEXT UNU": UNU, "TEXT DOI": DOI });
 
-    await expect(ruleazaEval({ extrage, dirFacturi, dirAsteptat, pauzaMs: 0, log: vi.fn() })).rejects.toThrow(
-      /02\.json/,
-    );
+    await expect(ruleazaEval(optiuni(extrage))).rejects.toThrow(/02\.json/);
     expect(extrage.texte).toEqual([]);
   });
 
   it("arunca o eroare care numeste fisierul cand valoarea asteptata nu e JSON", async () => {
     await scrie("01", "TEXT UNU", "{ nu e json");
-    await expect(
-      ruleazaEval({ extrage: extractorDupaText({}), dirFacturi, dirAsteptat, pauzaMs: 0, log: vi.fn() }),
-    ).rejects.toThrow(/01\.json/);
+    await expect(ruleazaEval(optiuni(extractorDupaText({})))).rejects.toThrow(/01\.json/);
   });
 
   it("arunca o eroare care numeste fisierul si campul cand valoarea asteptata nu respecta schema", async () => {
     const { total: _total, ...faraTotal } = UNU;
     await scrie("01", "TEXT UNU", JSON.stringify(faraTotal));
-    await expect(
-      ruleazaEval({ extrage: extractorDupaText({}), dirFacturi, dirAsteptat, pauzaMs: 0, log: vi.fn() }),
-    ).rejects.toThrow(/01\.json[\s\S]*total/);
+    await expect(ruleazaEval(optiuni(extractorDupaText({})))).rejects.toThrow(/01\.json[\s\S]*total/);
   });
 
   it("asteapta pauzaMs intre extrageri, nu si dupa ultima", async () => {
@@ -138,6 +146,8 @@ describe("ruleazaEval", () => {
       extrage: extractorDupaText({ "TEXT UNU": UNU, "TEXT DOI": DOI }),
       dirFacturi,
       dirAsteptat,
+      fisierCoduriAsteptate,
+      dataReferinta,
       pauzaMs: 4500,
       log: vi.fn(),
       asteapta: async (ms) => {
@@ -159,6 +169,8 @@ describe("ruleazaEval", () => {
       extrage: extractorDupaText({ "TEXT UNU": gresit, "TEXT DOI": { ...DOI, total: 30 } }),
       dirFacturi,
       dirAsteptat,
+      fisierCoduriAsteptate,
+      dataReferinta,
       pauzaMs: 0,
       log,
     });
@@ -186,6 +198,8 @@ describe("ruleazaEval", () => {
       extrage,
       dirFacturi,
       dirAsteptat,
+      fisierCoduriAsteptate,
+      dataReferinta,
       pauzaMs: 10,
       log: vi.fn(),
       asteapta: async (ms) => {
@@ -221,7 +235,7 @@ describe("ruleazaEval", () => {
       await scrie("02", "TEXT STRICAT", DOI);
       await scrie("03", "TEXT DOI", DOI);
 
-      const { consum } = await ruleazaEval({ extrage, dirFacturi, dirAsteptat, pauzaMs: 0, log: vi.fn() });
+      const { consum } = await ruleazaEval(optiuni(extrage));
 
       expect(consum.facturi).toEqual([
         {
@@ -259,7 +273,7 @@ describe("ruleazaEval", () => {
     it("nu imparte la zero cand toate extragerile esueaza", async () => {
       await scrie("01", "TEXT STRICAT", UNU);
 
-      const { consum } = await ruleazaEval({ extrage, dirFacturi, dirAsteptat, pauzaMs: 0, log: vi.fn() });
+      const { consum } = await ruleazaEval(optiuni(extrage));
 
       expect(consum).toMatchObject({ intrare: 0, iesire: 0, cost: 0, costMediu: null, latentaMedieMs: null });
     });
@@ -270,10 +284,12 @@ describe("ruleazaEval", () => {
       const fisierIesire = join(dir, "rezultate", "eval.md");
       const meta = { model: "gemini-3.5-flash-lite", dataRulare: "2026-11-12" };
 
-      const { sumar, consum } = await ruleaza({
+      const { sumar, consum, validare } = await ruleaza({
         extrage,
         dirFacturi,
         dirAsteptat,
+        fisierCoduriAsteptate,
+        dataReferinta,
         pauzaMs: 0,
         log: vi.fn(),
         fisierIesire,
@@ -281,9 +297,100 @@ describe("ruleazaEval", () => {
       });
 
       const scris = await readFile(fisierIesire, "utf8");
-      expect(scris).toBe(raportEval(sumar, consum, meta));
+      expect(scris).toBe(raportEval(sumar, consum, validare, meta));
       expect(scris).toContain("## Tokeni, cost si latenta");
       expect(scris).toContain("- Tokeni intrare: 3000");
+    });
+  });
+
+  describe("validare", () => {
+    // 01 corecta; 02 corecta, dar totalul citit gresit; 03 cu data dupa referinta, extrasa fidel; 04 gresita si esuata.
+    const TREI: Factura = { ...DOI, furnizor: "Tamplaria Trei SRL", data: "2026-11-20" };
+
+    async function scrieSetul() {
+      await scrie("01", "TEXT UNU", UNU);
+      await scrie("02", "TEXT DOI", DOI);
+      await scrie("03", "TEXT TREI", TREI, ["data_in_viitor"]);
+      await scrie("04", "TEXT STRICAT", UNU, ["suma_diferita"]);
+    }
+    const extrage = extractorDupaText({ "TEXT UNU": UNU, "TEXT DOI": { ...DOI, total: 30 }, "TEXT TREI": TREI });
+
+    it("valideaza fiecare factura extrasa si compara codurile obtinute cu cele asteptate", async () => {
+      await scrieSetul();
+
+      const { validare } = await ruleazaEval(optiuni(extrage));
+
+      expect(validare.facturi).toEqual([
+        { fisier: "01.txt", asteptate: [], obtinute: [], verdict: "corecta_ok" },
+        { fisier: "02.txt", asteptate: [], obtinute: ["suma_diferita"], verdict: "corecta_semnalata" },
+        {
+          fisier: "03.txt",
+          asteptate: ["data_in_viitor"],
+          obtinute: ["data_in_viitor"],
+          verdict: "gresita_coduri_asteptate",
+        },
+        { fisier: "04.txt", asteptate: ["suma_diferita"], obtinute: null, verdict: "extragere_esuata" },
+      ]);
+      expect(validare).toMatchObject({
+        dataReferinta,
+        gresite: 2,
+        gresiteSemnalate: 1,
+        corecte: 2,
+        corecteOk: 1,
+        total: 4,
+        potrivite: 2,
+      });
+    });
+
+    it("judeca data fata de data de referinta primita, nu fata de ceasul masinii", async () => {
+      await scrieSetul();
+
+      const { validare } = await ruleazaEval(optiuni(extrage, { dataReferinta: "2026-11-20" }));
+
+      expect(validare.facturi[2]).toMatchObject({ obtinute: [], verdict: "gresita_nesemnalata" });
+      expect(validare.dataReferinta).toBe("2026-11-20");
+    });
+
+    it("scrie codurile obtinute si asteptate in log", async () => {
+      await scrieSetul();
+      const log = vi.fn();
+
+      await ruleazaEval(optiuni(extrage, { log }));
+
+      expect(log.mock.calls.map(([linie]) => linie)).toEqual([
+        expect.stringMatching(/^01\.txt: .*, validare: ok \(asteptat: ok\)$/),
+        expect.stringMatching(/^02\.txt: .*, validare: suma_diferita \(asteptat: ok\)$/),
+        expect.stringMatching(/^03\.txt: .*, validare: data_in_viitor \(asteptat: data_in_viitor\)$/),
+        expect.stringMatching(/^04\.txt: extragere esuata/),
+      ]);
+    });
+
+    it("arunca o eroare care numeste factura fara coduri asteptate, inainte de orice extragere", async () => {
+      await scrie("01", "TEXT UNU", UNU);
+      await scrie("02", "TEXT DOI", DOI);
+      delete coduri["02"];
+      await writeFile(fisierCoduriAsteptate, JSON.stringify(coduri));
+      const extrage = extractorDupaText({ "TEXT UNU": UNU, "TEXT DOI": DOI });
+
+      await expect(ruleazaEval(optiuni(extrage))).rejects.toThrow(/asteptat-validare\.json.*02\.txt/);
+      expect(extrage.texte).toEqual([]);
+    });
+
+    it("arunca o eroare care numeste fisierul cand codurile asteptate lipsesc sau au un cod necunoscut", async () => {
+      await scrie("01", "TEXT UNU", UNU);
+      const extrage = extractorDupaText({});
+
+      await expect(ruleazaEval(optiuni(extrage, { fisierCoduriAsteptate: join(dir, "lipsa.json") }))).rejects.toThrow(
+        /lipsa\.json/,
+      );
+      await writeFile(fisierCoduriAsteptate, JSON.stringify({ "01": ["suma_gresita"] }));
+      await expect(ruleazaEval(optiuni(extrage))).rejects.toThrow(
+        /asteptat-validare\.json: codurile asteptate nu respecta schema[\s\S]*01/,
+      );
+    });
+
+    it("foloseste pentru setul de date data de referinta fixa 2026-11-12", () => {
+      expect(DATA_REFERINTA_SET).toBe("2026-11-12");
     });
   });
 
