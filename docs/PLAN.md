@@ -93,7 +93,10 @@ flowchart TD
 | Command | Does |
 |---|---|
 | `pnpm start` | reads `date/`, extracts, validates, writes `rezultate/facturi.csv` |
+| `pnpm start:pdf` | same on `date/pdf`, writes `rezultate/facturi-pdf.csv` |
 | `pnpm eval` | runs the eval set, writes `rezultate/eval.md` (accuracy + tokens + cost + latency) |
+| `pnpm eval:pdf` | same on the PDF copies, writes `rezultate/eval-pdf.md` |
+| `pnpm pdf` | dev-only: writes `date/pdf/NN.pdf` from `date/facturi/NN.txt` |
 | `pnpm compara` | same eval on 2-3 providers, writes `rezultate/comparatie.md` |
 | `pnpm test` | offline tests, no API key |
 | `pnpm typecheck` | `tsc --noEmit` |
@@ -126,7 +129,7 @@ Each slice is test-first and ends in a command that shows the result.
 | 4 | Validation rules, `de_verificat`, 5 faulty invoices, `pnpm start` continues past a failed extraction | rule tests, offline only (live runs wait for slice 5) | done |
 | 5 | `withFallbacks` (primary `gemini-3.5-flash-lite`, reserve `gemini-3.1-flash-lite`), answering model per invoice in the report | offline test: primary throws, reserve answers; then live `pnpm eval` and `pnpm start` on all 20 | done |
 | | **Bun** — tag `bun`, same commit | | reached |
-| 6 | PDF input with `pdfjs-dist` | eval on the PDF copies | todo |
+| 6 | PDF input with `pdfjs-dist`; `pnpm pdf` writes the PDFs from the txt set | `pnpm eval:pdf` → `rezultate/eval-pdf.md`, `pnpm start:pdf` → `rezultate/facturi-pdf.csv` | done |
 | 7 | Comparison on 2-3 providers | `rezultate/comparatie.md`: accuracy per field, cost, latency | todo |
 | | **Avansat** — tag `avansat` | | |
 | 8 | Final README | level reached, eval results, cost, what did not work, what to add after L13-18 | todo |
@@ -165,7 +168,7 @@ Verifier:
 
 ## 6. State and next steps
 
-Slices 0-5 are done, independently verified and pushed. Levels **Minim** and **Bun** are met. Left: slice 6 (PDF), slice 7 (comparison), slice 8 (README).
+Slices 0-6 are done, independently verified and pushed. Levels **Minim** and **Bun** are met; **Avansat** needs slice 7. Left: slice 7 (comparison), slice 8 (README).
 
 ### To resume
 
@@ -174,17 +177,19 @@ Slices 0-5 are done, independently verified and pushed. Levels **Minim** and **B
 3. `.env` (git-ignored) holds the Gemini key, the primary model and the reserve. `.env.example` lists the variables.
 4. Run the next slice as section 5 describes: one executor, a different agent to verify, commit and push on a PASS.
 
-### Decisions needed before the next slices
+### Decisions (owner, 2026-11-19)
 
-- **Slice 6, where the PDFs come from.** Default unless the owner says otherwise: a dev-only script writes `date/pdf/NN.pdf` from the same 20 synthetic invoices with `pdfkit` (a devDependency outside the course, used for data preparation only and named as such in the README). The owner may also supply a few fake, text-based PDFs as an extra test; scans need OCR, which is outside the course.
-- **Slice 7, which providers.** Only a Gemini key exists and Ollama is not installed. Either the owner adds a second provider (a key, or Ollama) for a true provider comparison, or the comparison covers Gemini models only and the README says so.
-- **Prompt line on Romanian number format.** Candidate fix for the `14.txt` misread below. Measure before and after; do not assume.
+- **Slice 6, where the PDFs come from:** a dev-only script writes `date/pdf/NN.pdf` from the same 20 synthetic invoices with `pdfkit` (a devDependency outside the course, used for data preparation only and named as such in the README). No owner-supplied PDFs; scans need OCR, which is outside the course.
+- **Slice 7, which providers:** Gemini models only, on the one key. The README says plainly that this is a comparison of models from one provider, not of providers.
+- **Still open: prompt line on Romanian number format.** Candidate fix for the `14.txt` misread below. Measure before and after; do not assume.
 
-### What slice 6 has to change
+### PDF input (slice 6)
 
-- `src/citire.ts` reads only `.txt`; `src/eval/ruleaza.ts` maps `NN.txt` to `NN.json` with a `.txt` regex; `tests/date.test.ts` hard-codes 20 files.
-- `date/asteptat-validare.json` is keyed by number (`"01"`), so the same key already names the PDF.
-- `pdfjs-dist` ^6.5.438 is not installed yet. Use the page text, not the book extractor from L11.
+- `pnpm pdf` (`src/genereaza-pdf.ts`, dev-only, the only importer of `pdfkit`) draws each txt line as-is in Liberation Sans 1.07.4 from `pdfjs-dist/standard_fonts` (GPLv2 with a font exception that allows embedding), uncompressed and with a pinned creation date, so the bytes are the same on any machine. All 20 PDFs are one page.
+- A test regenerates the PDFs and compares bytes, so an edited txt without `pnpm pdf` fails. Updating `pdfkit`, `fontkit` or `pdfjs-dist` can fail it too, with unchanged data: rerun `pnpm pdf` and commit the 20 files.
+- `src/pdf.ts` uses `pdfjs-dist/legacy/build/pdf.mjs` (the main build warns in Node), needs a `Uint8Array` (a `Buffer` is rejected) and is cleaned up with `loadingTask.destroy()`.
+- The page text comes back with the same lines and words as the txt, but without leading indentation and with repeated spaces collapsed.
+- `pnpm start` and `pnpm eval` take an optional `pdf` argument (`start:pdf`, `eval:pdf`); any other argument throws. The script wiring is checked by running it, not by a test.
 
 ### What slice 7 has to respect
 
@@ -192,6 +197,8 @@ Slices 0-5 are done, independently verified and pushed. Levels **Minim** and **B
 - The latency figure wraps the whole call, including retries. With the default 6 retries one 503 adds 1-2 minutes.
 - One run cannot separate two models that differ by a single check (see the run history). Run each at least twice if the quota allows.
 - A model with no row in `cost.ts` is reported as "pret necunoscut", never as free. Ollama has no row.
+- Gemini models only (decision above). `gemini-3-flash-preview` allows 20 requests a day, so it gets one 20-invoice run a day at most.
+- Pick the input set (txt or PDF) in the brief and use the same one for every model.
 
 ### Gemini free tier, as observed on 2026-11-12
 
@@ -225,6 +232,11 @@ The committed report is always the latest run, never the best one.
 | 3 | 15 | 13 | 217 / 255 | two invoices lost to 503; same `14.txt` misread |
 | 4 | 20 | 17 | 283 / 334 | three lost to 503 with the reserve's daily quota exhausted; all 17 fully correct |
 | 5 | 20 | 20 | 334 / 334 | reserve answered 4; validation 5/5, 15/15, 20/20; cost $0.0137 at list price |
+| 6 (PDF) | 20 | 20 | 333 / 334 | `17.pdf`: the impossible date 31.02.2026 returned as `2026-02-28`, so validation 4/5; `14` total read correctly; `20.pdf` took 296 s on retries; cost $0.0147 |
+
+`pnpm start:pdf` the same day flagged all 5 faulty invoices: the reserve answered `17.pdf` and kept 31.02.
+
+The txt `rezultate/eval.md` is from run 5 and has no `- Intrare:` line; the next txt `pnpm eval` adds it.
 
 Across the five runs the only wrong value on an extracted invoice is the `14.txt` total, in 2 runs of 5. The sum rule flags exactly that misread. No temperature is set in the course `llm.ts`. On clean text the set is easy for the model; the faulty invoices and the PDF text are where it is tested harder.
 
@@ -237,5 +249,6 @@ Across the five runs the only wrong value on an extracted invoice is the `14.txt
 
 ### Inputs for the final README (slice 8)
 
-- **What did not work:** provider 503s and the 20-per-day free-tier limit cost two live runs; the thousands separator misread; the reserve's error was hidden behind the primary's until the extractor recorded both; a perfect score on clean text says little.
+- **What did not work:** provider 503s and the 20-per-day free-tier limit cost two live runs; the thousands separator misread; the reserve's error was hidden behind the primary's until the extractor recorded both; a perfect score on clean text says little; on the PDF run the model silently turned the impossible date 31.02.2026 into 2026-02-28, which no date rule can catch because the result is a real date.
+- **PDF:** generated from the txt set with `pdfkit` (dev-only, outside the course) in an embedded Liberation Sans font; the extracted text loses indentation and repeated spaces; no scanned PDFs (OCR is outside the course).
 - **What to add after L13-18, not implemented:** a human review queue for `de_verificat` invoices with a pause in the flow (L13); tracing and eval tracking in LangSmith (L18).

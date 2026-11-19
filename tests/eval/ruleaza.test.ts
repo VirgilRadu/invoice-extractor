@@ -1,13 +1,16 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AIMessage } from "@langchain/core/messages";
 import { creeazaExtractor, type Extractor, type RezultatExtragere } from "../../src/extractor.js";
 import type { Factura } from "../../src/schema.js";
 import type { CodValidare } from "../../src/validare.js";
 import { raportEval } from "../../src/eval/raport.js";
-import { DATA_REFERINTA_SET, ruleaza, ruleazaEval, type OptiuniEval } from "../../src/eval/ruleaza.js";
+import { caiPentruSet, DATA_REFERINTA_SET, ruleaza, ruleazaEval, type OptiuniEval } from "../../src/eval/ruleaza.js";
+import { pdfDinText } from "../../src/genereaza-pdf.js";
+import { textDinPdf } from "../../src/pdf.js";
 import { ModelCarePica, ModelCareRaspunde } from "../modele-false.js";
 
 // dotenv/config inlocuit: factory-ul ruleaza doar daca modulul e importat.
@@ -288,7 +291,7 @@ describe("ruleazaEval", () => {
       await scrie("01", "TEXT UNU", UNU);
       await scrie("02", "TEXT DOI", DOI);
       const fisierIesire = join(dir, "rezultate", "eval.md");
-      const meta = { principal: "gemini-3.5-flash-lite", rezerva: null, dataRulare: "2026-11-12" };
+      const meta = { principal: "gemini-3.5-flash-lite", rezerva: null, dataRulare: "2026-11-12", intrare: "date/facturi (text)" };
 
       const { sumar, consum, validare } = await ruleaza({
         extrage,
@@ -437,6 +440,7 @@ describe("ruleazaEval", () => {
       principal: "gemini-3.5-flash-lite",
       rezerva: "gemini-3-flash-preview",
       dataRulare: "2026-11-12",
+      intrare: "date/facturi (text)",
     });
 
     expect(sumar).toMatchObject({ facturi: 1, facturiComplete: 1, corecte: 11, totalControale: 11 });
@@ -452,6 +456,100 @@ describe("ruleazaEval", () => {
     expect(raport).toContain("- Facturi la care a raspuns rezerva (gemini-3-flash-preview): 1 din 1 extrase\n");
     // 1000 x 0.50 + 200 x 3.00 = 1100 / 1M tokeni, pretul rezervei
     expect(raport).toContain("- Cost total: $0.001100\n");
+  });
+
+  describe("PDF", () => {
+    // Scrie NN.pdf in locul lui NN.txt, cu valoarea si codurile asteptate pe acelasi numar.
+    async function scriePdf(nume: string, text: string, asteptat: Factura, asteptateLaValidare: CodValidare[] = []) {
+      const pdf = await pdfDinText(text);
+      await writeFile(join(dirFacturi, `${nume}.pdf`), pdf);
+      await writeFile(join(dirAsteptat, `${nume}.json`), JSON.stringify(asteptat));
+      coduri[nume] = asteptateLaValidare;
+      await writeFile(fisierCoduriAsteptate, JSON.stringify(coduri));
+      return textDinPdf(pdf);
+    }
+
+    it("trimite textul PDF-ului la extractor si il compara cu NN.json si cu codurile de pe cheia NN", async () => {
+      const textUnu = await scriePdf("01", "TEXT UNU", UNU);
+      await scrie("02", "TEXT DOI", DOI);
+      const textTrei = await scriePdf("03", "TEXT TREI", { ...DOI, data: "2026-11-20" }, ["data_in_viitor"]);
+      const extrage = extractorDupaText({
+        [textUnu]: UNU,
+        "TEXT DOI": DOI,
+        [textTrei]: { ...DOI, data: "2026-11-20", total: 30 },
+      });
+
+      const { sumar, validare } = await ruleazaEval(optiuni(extrage));
+
+      expect(extrage.texte).toEqual([textUnu, "TEXT DOI", textTrei]);
+      expect(sumar.detalii).toEqual([
+        { fisier: "01.pdf", esecuri: [] },
+        { fisier: "02.txt", esecuri: [] },
+        { fisier: "03.pdf", esecuri: [{ control: "total", asteptat: 29, obtinut: 30 }] },
+      ]);
+      expect(validare.facturi.map(({ fisier, asteptate }) => [fisier, asteptate])).toEqual([
+        ["01.pdf", []],
+        ["02.txt", []],
+        ["03.pdf", ["data_in_viitor"]],
+      ]);
+    });
+
+    it("arunca inainte de orice extragere cand lipseste NN.json sau cheia NN a unui PDF", async () => {
+      await scriePdf("01", "TEXT UNU", UNU);
+      await writeFile(join(dirFacturi, "02.pdf"), await pdfDinText("TEXT DOI"));
+      const extrage = extractorDupaText({});
+
+      await expect(ruleazaEval(optiuni(extrage))).rejects.toThrow(/02\.json/);
+      await writeFile(join(dirAsteptat, "02.json"), JSON.stringify(DOI));
+      await expect(ruleazaEval(optiuni(extrage))).rejects.toThrow(/asteptat-validare\.json.*02\.pdf/);
+      expect(extrage.texte).toEqual([]);
+    });
+
+    it("ruleaza pe PDF-uri cu modelul fals si scrie in raport setul de intrare", async () => {
+      await scriePdf("01", "TEXT UNU", UNU);
+      const model = new ModelCareRaspunde({
+        structuredResponse: {
+          raw: new AIMessage({ content: "", usage_metadata: { input_tokens: 1000, output_tokens: 200, total_tokens: 1200 } }),
+          parsed: UNU,
+        },
+      });
+      const fisierIesire = join(dir, "rezultate", "eval-pdf.md");
+
+      const { sumar } = await ruleaza({
+        ...optiuni(creeazaExtractor(model, "gemini-3.5-flash-lite")),
+        fisierIesire,
+        principal: "gemini-3.5-flash-lite",
+        rezerva: null,
+        dataRulare: "2026-11-19",
+        intrare: "date/pdf (PDF)",
+      });
+
+      expect(sumar).toMatchObject({ facturi: 1, facturiComplete: 1, corecte: 11, totalControale: 11 });
+      expect(model.apeluri).toBe(1);
+      const raport = await readFile(fisierIesire, "utf8");
+      expect(raport).toContain("- Intrare: date/pdf (PDF)\n");
+      expect(raport).toContain("| 01.pdf | gemini-3.5-flash-lite | 11/11 | 1000 | 200 |");
+    });
+  });
+
+  describe("caiPentruSet", () => {
+    const cale = (relativ: string) => fileURLToPath(new URL(`../../${relativ}`, import.meta.url));
+
+    it("ruleaza implicit pe textele din date/facturi si scrie rezultate/eval.md", () => {
+      expect(caiPentruSet("txt")).toEqual({
+        dirFacturi: cale("date/facturi/"),
+        fisierIesire: cale("rezultate/eval.md"),
+        intrare: "date/facturi (text)",
+      });
+    });
+
+    it("ruleaza pe copiile din date/pdf si scrie rezultate/eval-pdf.md, langa raportul pe text", () => {
+      expect(caiPentruSet("pdf")).toEqual({
+        dirFacturi: cale("date/pdf/"),
+        fisierIesire: cale("rezultate/eval-pdf.md"),
+        intrare: "date/pdf (PDF, textul paginilor citit cu pdfjs-dist)",
+      });
+    });
   });
 
   it("nu incarca dotenv/config la import", () => {

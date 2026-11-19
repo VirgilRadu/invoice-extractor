@@ -1,12 +1,15 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AIMessage } from "@langchain/core/messages";
 import { FakeToolCallingModel } from "langchain";
 import { creeazaExtractor, type Extractor } from "../src/extractor.js";
 import type { Factura } from "../src/schema.js";
-import { ruleaza } from "../src/ruleaza.js";
+import { pdfDinText } from "../src/genereaza-pdf.js";
+import { textDinPdf } from "../src/pdf.js";
+import { caiPentruSet, ruleaza } from "../src/ruleaza.js";
 import { ModelCarePica, ModelCareRaspunde } from "./modele-false.js";
 
 // dotenv/config inlocuit: factory-ul ruleaza doar daca modulul e importat.
@@ -324,7 +327,51 @@ describe("ruleaza", () => {
     );
   });
 
+  it("ruleaza pe PDF-uri cu modelul fals: textul paginii ajunge la model, randul CSV poarta numele PDF-ului", async () => {
+    const pdf = await pdfDinText("FACTURĂ 01\nPreț: 45,50 lei\n");
+    await writeFile(join(intrare, "01.pdf"), pdf);
+    const model = new ModelCareRaspunde({
+      structuredResponse: {
+        raw: new AIMessage({ content: "", usage_metadata: { input_tokens: 300, output_tokens: 80, total_tokens: 380 } }),
+        parsed: FACTURA_UNU,
+      },
+    });
+    const texte: string[] = [];
+    const extrage = creeazaExtractor(model, "model-fals");
+
+    await ruleaza({
+      extrage: async (text) => {
+        texte.push(text);
+        return extrage(text);
+      },
+      dirIntrare: intrare,
+      fisierIesire: iesire,
+      log: vi.fn(),
+      azi: AZI,
+    });
+
+    expect(texte).toEqual([await textDinPdf(pdf)]);
+    expect(model.apeluri).toBe(1);
+    expect(await readFile(iesire, "utf8")).toBe(
+      ANTET +
+        "01.pdf,Flori Unu SRL,RO45187325,2026-10-14,Ghiveci,2,45.5,147.7,ok,\n" +
+        "01.pdf,Flori Unu SRL,RO45187325,2026-10-14,Pamant,3,18.9,147.7,ok,\n",
+    );
+  });
+
   it("nu incarca dotenv/config la import", () => {
     expect(dotenv.incarcat).toBe(false);
+  });
+});
+
+describe("caiPentruSet", () => {
+  const cale = (relativ: string) => fileURLToPath(new URL(`../${relativ}`, import.meta.url));
+
+  it("ruleaza implicit pe textele din date/facturi si scrie rezultate/facturi.csv", () => {
+    expect(caiPentruSet("txt")).toEqual({ dirIntrare: cale("date/facturi/"), fisierIesire: cale("rezultate/facturi.csv") });
+  });
+
+  it("ruleaza pe copiile din date/pdf si scrie rezultate/facturi-pdf.csv, langa CSV-ul pe text", () => {
+    expect(caiPentruSet("pdf")).toEqual({ dirIntrare: cale("date/pdf/"), fisierIesire: cale("rezultate/facturi-pdf.csv") });
   });
 });

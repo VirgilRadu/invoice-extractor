@@ -1,10 +1,11 @@
-// Rulare: pnpm start
-// Citeste facturile din date/facturi, le extrage cu modelul, le valideaza si scrie rezultate/facturi.csv.
+// Rulare: pnpm start (textele) sau pnpm start:pdf (copiile PDF)
+// Citeste facturile din date/facturi, le extrage cu modelul, le valideaza si scrie rezultate/facturi.csv;
+// cu argumentul pdf citeste date/pdf si scrie rezultate/facturi-pdf.csv.
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, relative } from "node:path";
 import { setTimeout as pauza } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { citesteFacturi } from "./citire.js";
+import { citesteFacturi, setDinArgumente, type SetIntrare } from "./citire.js";
 import { inCsv, type RandFactura } from "./csv.js";
 import { PAUZA_INTRE_APELURI_MS, type Extractor, type RezultatExtragere } from "./extractor.js";
 import { descriereModele, extractorDinModele, modeleDinMediu, numeModele } from "./model.js";
@@ -62,19 +63,30 @@ export async function ruleaza({
   log(`Facturi: ${randuri.length}, ok: ${ok}, de_verificat: ${randuri.length - ok}`);
 }
 
+// PDF-urile au CSV-ul lor, ca rezultatul pe text sa ramana alaturi.
+export function caiPentruSet(set: SetIntrare): { dirIntrare: string; fisierIesire: string } {
+  const [dir, csv] = set === "pdf" ? ["date/pdf/", "facturi-pdf.csv"] : ["date/facturi/", "facturi.csv"];
+  return {
+    dirIntrare: fileURLToPath(new URL(`../${dir}`, import.meta.url)),
+    fisierIesire: fileURLToPath(new URL(`../rezultate/${csv}`, import.meta.url)),
+  };
+}
+
 // .env se incarca doar cand fisierul e rulat ca script, niciodata la import.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const { dirIntrare, fisierIesire } = caiPentruSet(setDinArgumente(process.argv.slice(2)));
   await import("dotenv/config");
   const modele = modeleDinMediu();
   console.log(descriereModele(numeModele(modele)));
-  const fisierIesire = fileURLToPath(new URL("../rezultate/facturi.csv", import.meta.url));
+  const radacina = fileURLToPath(new URL("..", import.meta.url));
+  console.log(`Intrare: ${relative(radacina, dirIntrare)}`);
   await ruleaza({
     extrage: extractorDinModele(modele),
-    dirIntrare: fileURLToPath(new URL("../date/facturi/", import.meta.url)),
+    dirIntrare,
     fisierIesire,
     log: console.log,
     azi: ziuaCalendaristica(new Date()),
     pauzaMs: PAUZA_INTRE_APELURI_MS,
   });
-  console.log("Scris: rezultate/facturi.csv");
+  console.log(`Scris: ${relative(radacina, fisierIesire)}`);
 }

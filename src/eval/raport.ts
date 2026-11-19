@@ -3,8 +3,8 @@ import { CONTROALE_FACTURA, CONTROALE_LINIE, type Esec, type SumarEval } from ".
 import type { ConsumModel, SumarConsum } from "./consum.js";
 import type { SumarValidare, VerdictValidare } from "./validare.js";
 
-// rezerva null = rulare fara model de rezerva.
-export type MetaRaport = { principal: string; rezerva: string | null; dataRulare: string };
+// rezerva null = rulare fara model de rezerva; intrare numeste setul citit (text sau PDF).
+export type MetaRaport = { principal: string; rezerva: string | null; dataRulare: string; intrare: string };
 type Modele = Pick<MetaRaport, "principal" | "rezerva">;
 
 const procent = (valoare: number) => `${(valoare * 100).toFixed(1)}%`;
@@ -108,7 +108,7 @@ export function raportEval(
   sumar: SumarEval,
   consum: SumarConsum,
   validare: SumarValidare,
-  { principal, rezerva, dataRulare }: MetaRaport,
+  { principal, rezerva, dataRulare, intrare }: MetaRaport,
 ): string {
   const facturi = sumar.detalii.flatMap(({ fisier, eroare, esecuri }) => {
     if (eroare !== undefined) return [`- ${fisier}: extragere esuata: ${eroare.replace(/\s+/g, " ").trim()}`];
@@ -121,6 +121,7 @@ export function raportEval(
     `- Model principal: ${principal}`,
     `- Model de rezerva: ${rezerva ?? "fara rezerva"}`,
     `- Data rularii: ${dataRulare}`,
+    `- Intrare: ${intrare}`,
     `- Facturi: ${sumar.facturi}`,
     `- Facturi complet corecte: ${sumar.facturiComplete} din ${sumar.facturi}`,
     `- Acuratete totala: ${procent(sumar.acurateteTotala)} (${sumar.corecte} din ${sumar.totalControale} controale)`,

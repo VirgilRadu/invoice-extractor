@@ -1,11 +1,12 @@
-// Rulare: pnpm eval
-// Extrage facturile din date/facturi, le compara cu date/asteptat, le valideaza si scrie rezultate/eval.md.
+// Rulare: pnpm eval (textele) sau pnpm eval:pdf (copiile PDF)
+// Extrage facturile din date/facturi, le compara cu date/asteptat, le valideaza si scrie rezultate/eval.md;
+// cu argumentul pdf citeste date/pdf si scrie rezultate/eval-pdf.md.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, join, parse } from "node:path";
 import { setTimeout as pauza } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { z } from "zod";
-import { citesteFacturi } from "../citire.js";
+import { citesteFacturi, setDinArgumente, type SetIntrare } from "../citire.js";
 import { PAUZA_INTRE_APELURI_MS, type Extractor } from "../extractor.js";
 import { formatCost } from "../lib/cost.js";
 import { descriereModele, extractorDinModele, modeleDinMediu, numeModele } from "../model.js";
@@ -89,12 +90,13 @@ export async function ruleazaEval({
 }: OptiuniEval): Promise<RezultatEval> {
   verificaZiuaDeReferinta(dataReferinta);
   const documente = await citesteFacturi(dirFacturi);
+  // NN.txt si NN.pdf au aceeasi valoare asteptata, NN.json, si aceleasi coduri, pe cheia NN.
   const asteptate = await Promise.all(
-    documente.map(({ fisier }) => citesteAsteptat(join(dirAsteptat, fisier.replace(/\.txt$/, ".json")))),
+    documente.map(({ fisier }) => citesteAsteptat(join(dirAsteptat, `${parse(fisier).name}.json`))),
   );
   const toateCodurile = await citesteCoduriAsteptate(fisierCoduriAsteptate);
   const coduriAsteptate = documente.map(({ fisier }) => {
-    const lista = toateCodurile[fisier.replace(/\.txt$/, "")];
+    const lista = toateCodurile[parse(fisier).name];
     if (lista === undefined) throw new Error(`${fisierCoduriAsteptate}: lipsesc codurile asteptate pentru ${fisier}`);
     return lista;
   });
@@ -141,13 +143,14 @@ export async function ruleaza({
   principal,
   rezerva,
   dataRulare,
+  intrare,
   ...optiuni
 }: OptiuniRulareEval): Promise<RezultatEval> {
   const { log } = optiuni;
   const rezultat = await ruleazaEval(optiuni);
   const { sumar, consum, validare } = rezultat;
   await mkdir(dirname(fisierIesire), { recursive: true });
-  await writeFile(fisierIesire, raportEval(sumar, consum, validare, { principal, rezerva, dataRulare }), "utf8");
+  await writeFile(fisierIesire, raportEval(sumar, consum, validare, { principal, rezerva, dataRulare, intrare }), "utf8");
   log(`\n${tabelCampuri(sumar)}\n`);
   log(`Facturi complet corecte: ${sumar.facturiComplete} din ${sumar.facturi}`);
   log(`Acuratete totala: ${(sumar.acurateteTotala * 100).toFixed(1)}%`);
@@ -168,18 +171,32 @@ export async function ruleaza({
   return rezultat;
 }
 
+// Setul de intrare: directorul, raportul si cum e numit in raport. PDF-urile au raportul lor, langa cel pe text.
+export function caiPentruSet(set: SetIntrare): { dirFacturi: string; fisierIesire: string; intrare: string } {
+  const [dir, raport, intrare] =
+    set === "pdf"
+      ? ["date/pdf/", "eval-pdf.md", "date/pdf (PDF, textul paginilor citit cu pdfjs-dist)"]
+      : ["date/facturi/", "eval.md", "date/facturi (text)"];
+  return {
+    dirFacturi: fileURLToPath(new URL(`../../${dir}`, import.meta.url)),
+    fisierIesire: fileURLToPath(new URL(`../../rezultate/${raport}`, import.meta.url)),
+    intrare,
+  };
+}
+
 // .env se incarca doar cand fisierul e rulat ca script, niciodata la import.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const cai = caiPentruSet(setDinArgumente(process.argv.slice(2)));
   await import("dotenv/config");
   const modele = modeleDinMediu();
   console.log(descriereModele(numeModele(modele)));
+  console.log(`Intrare: ${cai.intrare}`);
   await ruleaza({
     extrage: extractorDinModele(modele),
-    dirFacturi: fileURLToPath(new URL("../../date/facturi/", import.meta.url)),
+    ...cai,
     dirAsteptat: fileURLToPath(new URL("../../date/asteptat/", import.meta.url)),
     fisierCoduriAsteptate: fileURLToPath(new URL("../../date/asteptat-validare.json", import.meta.url)),
     dataReferinta: DATA_REFERINTA_SET,
-    fisierIesire: fileURLToPath(new URL("../../rezultate/eval.md", import.meta.url)),
     pauzaMs: PAUZA_INTRE_APELURI_MS,
     log: console.log,
     ...numeModele(modele),

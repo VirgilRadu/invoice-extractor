@@ -37,7 +37,7 @@ const RANDURI: ConsumFactura[] = [
   { fisier: "03.txt", corecte: 0, controale: 11, tokeni: { intrare: 0, iesire: 0 }, latentaMs: null, model: null, dinRezerva: false },
 ];
 const CONSUM = sumarConsum(RANDURI);
-const META = { principal: LITE, rezerva: FLASH, dataRulare: "2026-11-12" };
+const META = { principal: LITE, rezerva: FLASH, dataRulare: "2026-11-12", intrare: "date/facturi (text)" };
 
 // Aceleasi 3 facturi: 01 lasata ok, 02 corecta dar semnalata dupa o citire gresita, 03 gresita si esuata.
 const VALIDARE = sumarValidare(
@@ -117,6 +117,7 @@ describe("raportEval", () => {
         "- Model principal: gemini-3.5-flash-lite",
         "- Model de rezerva: gemini-3-flash-preview",
         "- Data rularii: 2026-11-12",
+        "- Intrare: date/facturi (text)",
         "- Facturi: 3",
         "- Facturi complet corecte: 1 din 3",
         "- Acuratete totala: 60.6% (20 din 33 controale)",
@@ -159,7 +160,7 @@ describe("raportEval", () => {
 
   it("spune ca pretul e necunoscut cand modelul nu are rand in cost.ts, in loc de un cost 0", () => {
     const randuri = RANDURI.map((r) => (r.model === null ? r : { ...r, model: "model-fals" }));
-    const meta = { principal: "model-fals", rezerva: null, dataRulare: "2026-11-12" };
+    const meta = { ...META, principal: "model-fals", rezerva: null };
     const raport = raportEval(SUMAR, sumarConsum(randuri), VALIDARE, meta);
     expect(raport).toContain("- Cost total: pret necunoscut\n");
     expect(raport).toContain("- Cost mediu pe factura extrasa: pret necunoscut (2 extrase din 3)\n");
