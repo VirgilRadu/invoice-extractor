@@ -7,12 +7,12 @@ import type { SumarValidare, VerdictValidare } from "./validare.js";
 export type MetaRaport = { principal: string; rezerva: string | null; dataRulare: string; intrare: string };
 type Modele = Pick<MetaRaport, "principal" | "rezerva">;
 
-const procent = (valoare: number) => `${(valoare * 100).toFixed(1)}%`;
+export const procent = (valoare: number) => `${(valoare * 100).toFixed(1)}%`;
 
 // Textul apare intre ghilimele, ca sa se vada spatiile; valoarea lipsa (linie neextrasa) e "lipsa".
 const valoare = (v: unknown) => (v === undefined ? "lipsa" : JSON.stringify(v));
 
-const esec = ({ control, linie, asteptat, obtinut }: Esec) =>
+export const esec = ({ control, linie, asteptat, obtinut }: Esec) =>
   `  - ${linie === undefined ? "" : `linia ${linie}, `}${control}: asteptat ${valoare(asteptat)}, obtinut ${valoare(obtinut)}`;
 
 export function tabelCampuri(sumar: SumarEval): string {
@@ -26,7 +26,7 @@ export function tabelCampuri(sumar: SumarEval): string {
 // Costul null inseamna model fara pret in cost.ts: se scrie "pret necunoscut", nu 0.
 const cost = (valoare: number | null) => (valoare === null ? "pret necunoscut" : formatCost(valoare));
 const ms = (valoare: number | null) => (valoare === null ? "-" : `${Math.round(valoare)} ms`);
-const usd = (valoare: number) => `$${Number(valoare.toFixed(2)) === valoare ? valoare.toFixed(2) : valoare}`;
+export const usd = (valoare: number) => `$${Number(valoare.toFixed(2)) === valoare ? valoare.toFixed(2) : valoare}`;
 
 function pretFolosit({ model, facturi, intrare, iesire }: Omit<ConsumModel, "cost">): string {
   const pret = pricingFor(model);
@@ -67,7 +67,7 @@ export function sectiuneCost(consum: SumarConsum, { principal, rezerva }: Modele
   ].join("\n");
 }
 
-const VERDICTE: Record<VerdictValidare, string> = {
+export const VERDICTE: Record<VerdictValidare, string> = {
   corecta_ok: "corecta, lasata ok",
   corecta_semnalata: "corecta, semnalata: validarea a prins o valoare extrasa gresit",
   gresita_coduri_asteptate: "gresita, semnalata cu codurile asteptate",

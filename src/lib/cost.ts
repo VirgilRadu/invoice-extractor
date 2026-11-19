@@ -89,23 +89,24 @@ const PRICING_PER_M_TOKENS: Record<string, { input: number; output: number }> =
     "grok-build-0.1": { input: 1.0, output: 2.0 }, // cel mai ieftin
   };
 
-// Exportat pentru raportul de eval, ca pretul afisat sa fie cel folosit de calculateCost.
-export function pricingFor(model: string): { input: number; output: number } | undefined {
+// [+ Tema 7] Randul din tabel folosit pentru model, ca raportul sa-l numeasca; undefined = model fara pret.
+export function randPret(model: string): string | undefined {
   const key = model.toLowerCase();
-  const exact = PRICING_PER_M_TOKENS[key];
-  if (exact) return exact;
+  if (PRICING_PER_M_TOKENS[key]) return key;
 
   // Azure/OpenAI trimit adesea 'gpt-4o-mini-2024-07-18'. Căutăm cea mai lungă
   // cheie din tabel care e prefix al numelui, ca să nu întoarcem 0 / n/a.
-  let best: { input: number; output: number } | undefined;
-  let bestLen = 0;
-  for (const [k, v] of Object.entries(PRICING_PER_M_TOKENS)) {
-    if (key.startsWith(k) && k.length > bestLen) {
-      best = v;
-      bestLen = k.length;
-    }
+  let best: string | undefined;
+  for (const k of Object.keys(PRICING_PER_M_TOKENS)) {
+    if (key.startsWith(k) && k.length > (best?.length ?? 0)) best = k;
   }
   return best;
+}
+
+// Exportat pentru raportul de eval, ca pretul afisat sa fie cel folosit de calculateCost.
+export function pricingFor(model: string): { input: number; output: number } | undefined {
+  const rand = randPret(model);
+  return rand === undefined ? undefined : PRICING_PER_M_TOKENS[rand];
 }
 
 export function calculateCost(

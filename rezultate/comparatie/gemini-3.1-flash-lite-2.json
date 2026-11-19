@@ -1,0 +1,762 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.1-flash-lite",
+  "rulare": 2,
+  "inceput": "2026-11-19T17:06:32.609Z",
+  "intrare": "date/pdf (PDF, textul paginilor citit cu pdfjs-dist)",
+  "dataReferinta": "2026-11-12",
+  "reincercari": 2,
+  "pauzaMs": 4500,
+  "facturi": [
+    {
+      "fisier": "01.pdf",
+      "factura": {
+        "furnizor": "ATELIERUL VERDE FLORAL S.R.L.",
+        "cui": "RO45187325",
+        "data": "2026-10-14",
+        "linii": [
+          {
+            "produs": "Ghiveci ceramic 20 cm",
+            "cantitate": 2,
+            "pret": 45.5
+          },
+          {
+            "produs": "Pământ pentru flori 10 l",
+            "cantitate": 3,
+            "pret": 18.9
+          },
+          {
+            "produs": "Orhidee Phalaenopsis albă",
+            "cantitate": 1,
+            "pret": 89.99
+          }
+        ],
+        "total": 237.69
+      },
+      "tokeni": {
+        "intrare": 408,
+        "iesire": 208
+      },
+      "latentaMs": 23843.739334000275,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "02.pdf",
+      "factura": {
+        "furnizor": "MINIMARKET LA DOI PASI S.R.L.",
+        "cui": "RO38714023",
+        "data": "2026-11-03",
+        "linii": [
+          {
+            "produs": "MERE IONATAN",
+            "cantitate": 1.25,
+            "pret": 8.8
+          },
+          {
+            "produs": "LAPTE 3,5% GRASIME 1 L",
+            "cantitate": 2,
+            "pret": 6.49
+          },
+          {
+            "produs": "CASCAVAL DALIA FELIAT",
+            "cantitate": 0.64,
+            "pret": 42.5
+          },
+          {
+            "produs": "PAINE INTEGRALA 500 G",
+            "cantitate": 1,
+            "pret": 4.35
+          },
+          {
+            "produs": "APA PLATA 2 L",
+            "cantitate": 3,
+            "pret": 2.99
+          }
+        ],
+        "total": 64.5
+      },
+      "tokeni": {
+        "intrare": 412,
+        "iesire": 295
+      },
+      "latentaMs": 13600.017667000182,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "03.pdf",
+      "factura": {
+        "furnizor": "DIGITAL SOFT LABS S.R.L.",
+        "cui": "21945678",
+        "data": "2026-09-22",
+        "linii": [
+          {
+            "produs": "Dezvoltare modul raportare vanzari",
+            "cantitate": 1,
+            "pret": 4235
+          },
+          {
+            "produs": "Mentenanta aplicatie (luna)",
+            "cantitate": 3,
+            "pret": 1210
+          }
+        ],
+        "total": 7865
+      },
+      "tokeni": {
+        "intrare": 398,
+        "iesire": 165
+      },
+      "latentaMs": 24166.892583999783,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "04.pdf",
+      "factura": {
+        "furnizor": "ELECTRO SCANTEIA S.R.L.",
+        "cui": "RO16759300",
+        "data": "2026-10-09",
+        "linii": [
+          {
+            "produs": "Cablu MYYM, 3x2,5 mm",
+            "cantitate": 25.5,
+            "pret": 6.4
+          },
+          {
+            "produs": "Priză dublă cu împământare, albă",
+            "cantitate": 4,
+            "pret": 18.75
+          },
+          {
+            "produs": "Întrerupător simplu",
+            "cantitate": 3,
+            "pret": 12.3
+          },
+          {
+            "produs": "Doză aparat, D60",
+            "cantitate": 10,
+            "pret": 1.15
+          },
+          {
+            "produs": "Bec LED E27, 9 W, lumină caldă",
+            "cantitate": 6,
+            "pret": 8.99
+          },
+          {
+            "produs": "Tub PVC flexibil, 16 mm",
+            "cantitate": 12.5,
+            "pret": 2.2
+          }
+        ],
+        "total": 368.04
+      },
+      "tokeni": {
+        "intrare": 384,
+        "iesire": 355
+      },
+      "latentaMs": 10447.058249999769,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "05.pdf",
+      "factura": {
+        "furnizor": "PETROL EXPRES DRUMUL MARE SRL",
+        "cui": "33928174",
+        "data": "2026-11-05",
+        "linii": [
+          {
+            "produs": "MOTORINA STANDARD",
+            "cantitate": 42.37,
+            "pret": 7.89
+          }
+        ],
+        "total": 334.3
+      },
+      "tokeni": {
+        "intrare": 209,
+        "iesire": 116
+      },
+      "latentaMs": 17106.248875000514,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "06.pdf",
+      "factura": {
+        "furnizor": "PAPETARIA BIROUL VESEL S.R.L.",
+        "cui": "RO28431054",
+        "data": "2026-09-30",
+        "linii": [
+          {
+            "produs": "Hârtie copiator A4 \"Premium\" 80 g",
+            "cantitate": 5,
+            "pret": 27.9
+          },
+          {
+            "produs": "Pix cu gel, albastru",
+            "cantitate": 20,
+            "pret": 3.4
+          },
+          {
+            "produs": "Dosar plic transparent",
+            "cantitate": 4,
+            "pret": 11.25
+          },
+          {
+            "produs": "Biblioraft 7,5 cm",
+            "cantitate": 6,
+            "pret": 14.8
+          },
+          {
+            "produs": "Capsator metalic \"Office 24\"",
+            "cantitate": 1,
+            "pret": 36.5
+          },
+          {
+            "produs": "Capse 24/6, cutie 1000 buc",
+            "cantitate": 3,
+            "pret": 4.99
+          },
+          {
+            "produs": "Post-it 76x76 mm, galben",
+            "cantitate": 2,
+            "pret": 17.6
+          },
+          {
+            "produs": "Marker permanent negru",
+            "cantitate": 8,
+            "pret": 5.25
+          }
+        ],
+        "total": 469.97
+      },
+      "tokeni": {
+        "intrare": 472,
+        "iesire": 424
+      },
+      "latentaMs": 56941.667666000314,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "07.pdf",
+      "factura": {
+        "furnizor": "GRADINA DE SUS PRODUCTIE S.R.L.",
+        "cui": "RO44102762",
+        "data": "2026-08-17",
+        "linii": [
+          {
+            "produs": "Rasaduri rosii cherry, tava 12 buc",
+            "cantitate": 7,
+            "pret": 24
+          },
+          {
+            "produs": "Ierburi aromatice la ghiveci",
+            "cantitate": 15,
+            "pret": 9.5
+          },
+          {
+            "produs": "Ingrasamant organic 5 kg",
+            "cantitate": 2,
+            "pret": 47.9
+          }
+        ],
+        "total": 406.3
+      },
+      "tokeni": {
+        "intrare": 386,
+        "iesire": 206
+      },
+      "latentaMs": 1525.5220840005204,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "08.pdf",
+      "factura": {
+        "furnizor": "FARMACIA SALCAMUL VERDE SRL",
+        "cui": "37205811",
+        "data": "2026-11-11",
+        "linii": [
+          {
+            "produs": "VITAMINA C 1000 MG, 30 CPR",
+            "cantitate": 2,
+            "pret": 24.9
+          },
+          {
+            "produs": "SIROP TUSE PLANTE 150 ML",
+            "cantitate": 1,
+            "pret": 31.45
+          },
+          {
+            "produs": "PLASTURI ELASTICE 20 BUC",
+            "cantitate": 3,
+            "pret": 7.6
+          },
+          {
+            "produs": "UNGUENT GALBENELE 50 G",
+            "cantitate": 1,
+            "pret": 16.2
+          }
+        ],
+        "total": 120.25
+      },
+      "tokeni": {
+        "intrare": 345,
+        "iesire": 260
+      },
+      "latentaMs": 167268.35095900018,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "09.pdf",
+      "factura": {
+        "furnizor": "MATERIALE CONSTRUCTII PIATRA ALBA S.R.L.",
+        "cui": "RO26173943",
+        "data": "2026-09-02",
+        "linii": [
+          {
+            "produs": "Ciment Portland 40 kg",
+            "cantitate": 50,
+            "pret": 38.9
+          },
+          {
+            "produs": "Otel beton PC52, diametru 10 mm",
+            "cantitate": 1250,
+            "pret": 6.15
+          },
+          {
+            "produs": "Nisip spalat 0-4 mm",
+            "cantitate": 2.5,
+            "pret": 145
+          },
+          {
+            "produs": "Caramida plina 240x115x63",
+            "cantitate": 400,
+            "pret": 2.35
+          }
+        ],
+        "total": 10935
+      },
+      "tokeni": {
+        "intrare": 447,
+        "iesire": 272
+      },
+      "latentaMs": 4577.247750000097,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "10.pdf",
+      "factura": {
+        "furnizor": "BRUTARIA CUPTORUL BUNICII SRL",
+        "cui": "41528039",
+        "data": "2026-11-10",
+        "linii": [
+          {
+            "produs": "COVRIGI CU SARE, PUNGA 5 BUC",
+            "cantitate": 2,
+            "pret": 5.5
+          },
+          {
+            "produs": "CORNULETE CU MAGIUN",
+            "cantitate": 6,
+            "pret": 2.2
+          },
+          {
+            "produs": "PAINE DE CASA 800G",
+            "cantitate": 1,
+            "pret": 9.8
+          }
+        ],
+        "total": 34
+      },
+      "tokeni": {
+        "intrare": 227,
+        "iesire": 205
+      },
+      "latentaMs": 12300.025291999802,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "11.pdf",
+      "factura": {
+        "furnizor": "CONTA EXACT EXPERT S.R.L.",
+        "cui": "215476",
+        "data": "2026-10-31",
+        "linii": [
+          {
+            "produs": "Servicii contabilitate, luna octombrie 2026",
+            "cantitate": 1,
+            "pret": 1815
+          },
+          {
+            "produs": "Consultanță fiscală suplimentară",
+            "cantitate": 7.5,
+            "pret": 145.2
+          },
+          {
+            "produs": "Întocmire declarații, situații lunare",
+            "cantitate": 2,
+            "pret": 121
+          }
+        ],
+        "total": 3146
+      },
+      "tokeni": {
+        "intrare": 309,
+        "iesire": 213
+      },
+      "latentaMs": 16707.38454100024,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "12.pdf",
+      "factura": {
+        "furnizor": "FERMA \"DEALUL INSORIT\" S.R.L.",
+        "cui": "RO30657194",
+        "data": "2026-10-07",
+        "linii": [
+          {
+            "produs": "Miere de salcam 1 kg",
+            "cantitate": 4,
+            "pret": 52
+          },
+          {
+            "produs": "Branza de burduf, 500 g",
+            "cantitate": 3,
+            "pret": 38.5
+          },
+          {
+            "produs": "Telemea de oaie",
+            "cantitate": 1.5,
+            "pret": 44
+          },
+          {
+            "produs": "Oua de tara",
+            "cantitate": 10,
+            "pret": 1.6
+          },
+          {
+            "produs": "Lapte de oaie",
+            "cantitate": 2,
+            "pret": 12
+          }
+        ],
+        "total": 429.5
+      },
+      "tokeni": {
+        "intrare": 333,
+        "iesire": 291
+      },
+      "latentaMs": 15342.603041999973,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "13.pdf",
+      "factura": {
+        "furnizor": "FIERARIA DIN COLT SRL",
+        "cui": "RO24791506",
+        "data": "2026-11-09",
+        "linii": [
+          {
+            "produs": "SURUBURI LEMN 4X40 (100 BUC)",
+            "cantitate": 2,
+            "pret": 9.9
+          },
+          {
+            "produs": "DIBLURI 6 MM (50 BUC)",
+            "cantitate": 1,
+            "pret": 7.5
+          },
+          {
+            "produs": "BANDA IZOLIERE NEAGRA",
+            "cantitate": 3,
+            "pret": 4.5
+          },
+          {
+            "produs": "LACAT ALAMA 40 MM",
+            "cantitate": 1,
+            "pret": 34
+          }
+        ],
+        "total": 74.8
+      },
+      "tokeni": {
+        "intrare": 263,
+        "iesire": 246
+      },
+      "latentaMs": 47857.450667000376,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "14.pdf",
+      "factura": {
+        "furnizor": "AUTO SERVICE ROTILA S.R.L.",
+        "cui": "RO42933862",
+        "data": "2026-08-20",
+        "linii": [
+          {
+            "produs": "Ulei motor 5W-30, 4 l",
+            "cantitate": 1,
+            "pret": 219
+          },
+          {
+            "produs": "Filtru ulei",
+            "cantitate": 1,
+            "pret": 54.9
+          },
+          {
+            "produs": "Filtru aer",
+            "cantitate": 1,
+            "pret": 72.4
+          },
+          {
+            "produs": "Plăcuțe frână față, set",
+            "cantitate": 1,
+            "pret": 289
+          },
+          {
+            "produs": "Manoperă service",
+            "cantitate": 2.5,
+            "pret": 181.5
+          }
+        ],
+        "total": 1089.05
+      },
+      "tokeni": {
+        "intrare": 450,
+        "iesire": 287
+      },
+      "latentaMs": 13188.18874999974,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "15.pdf",
+      "factura": {
+        "furnizor": "PENSIUNEA DOUA BRAZI S.R.L.",
+        "cui": "39146282",
+        "data": "2026-07-06",
+        "linii": [
+          {
+            "produs": "Cazare camera dubla / noapte",
+            "cantitate": 3,
+            "pret": 320
+          },
+          {
+            "produs": "Mic dejun / persoana",
+            "cantitate": 6,
+            "pret": 35
+          },
+          {
+            "produs": "Taxa de statiune / persoana / zi",
+            "cantitate": 6,
+            "pret": 2.5
+          },
+          {
+            "produs": "Minibar - apa minerala",
+            "cantitate": 2,
+            "pret": 8
+          }
+        ],
+        "total": 1201
+      },
+      "tokeni": {
+        "intrare": 395,
+        "iesire": 248
+      },
+      "latentaMs": 39324.69675000012,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "16.pdf",
+      "factura": {
+        "furnizor": "PET SHOP LABUTE VESELE S.R.L.",
+        "cui": "RO36448332",
+        "data": "2026-10-21",
+        "linii": [
+          {
+            "produs": "Hrana uscata caini adulti 12 kg",
+            "cantitate": 1,
+            "pret": 239.9
+          },
+          {
+            "produs": "Nisip pisici bentonita 10 l",
+            "cantitate": 3,
+            "pret": 34.5
+          },
+          {
+            "produs": "Zgarda reglabila nylon M",
+            "cantitate": 2,
+            "pret": 27.8
+          },
+          {
+            "produs": "Recompense dentare caini, 7 buc",
+            "cantitate": 4,
+            "pret": 18.25
+          }
+        ],
+        "total": 427
+      },
+      "tokeni": {
+        "intrare": 447,
+        "iesire": 256
+      },
+      "latentaMs": 38064.87666600011,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "17.pdf",
+      "factura": {
+        "furnizor": "LIBRARIA PAGINA ALBASTRA SRL",
+        "cui": "32014314",
+        "data": "2026-02-31",
+        "linii": [
+          {
+            "produs": "CAIET A4 MATEMATICA 80 FILE",
+            "cantitate": 5,
+            "pret": 6.2
+          },
+          {
+            "produs": "PIX GEL ALBASTRU 0,5 MM",
+            "cantitate": 3,
+            "pret": 4.75
+          },
+          {
+            "produs": "ACUARELE 12 CULORI",
+            "cantitate": 1,
+            "pret": 22.9
+          },
+          {
+            "produs": "BLOC DESEN A3 20 FILE",
+            "cantitate": 2,
+            "pret": 9.4
+          }
+        ],
+        "total": 86.95
+      },
+      "tokeni": {
+        "intrare": 350,
+        "iesire": 250
+      },
+      "latentaMs": 2104.1852080002427,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "18.pdf",
+      "factura": {
+        "furnizor": "CURATATORIA ECO PRESTIGE S.R.L.",
+        "cui": "RO27219604",
+        "data": "2026-10-28",
+        "linii": [
+          {
+            "produs": "Spalare si calcare lenjerie pat, set",
+            "cantitate": 40,
+            "pret": 18.5
+          },
+          {
+            "produs": "Curatare chimica perdele",
+            "cantitate": 12.5,
+            "pret": 22
+          },
+          {
+            "produs": "Spalare prosoape",
+            "cantitate": 120,
+            "pret": 3.4
+          }
+        ],
+        "total": 1423
+      },
+      "tokeni": {
+        "intrare": 397,
+        "iesire": 210
+      },
+      "latentaMs": 43260.99520799983,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "19.pdf",
+      "factura": {
+        "furnizor": "OLARIA CU SUFLET S.R.L.",
+        "cui": "RO47840799123",
+        "data": "2026-10-16",
+        "linii": [
+          {
+            "produs": "Cana ceramica pictata manual",
+            "cantitate": 6,
+            "pret": 42
+          },
+          {
+            "produs": "Platou servire 30 cm",
+            "cantitate": 2,
+            "pret": 118.5
+          },
+          {
+            "produs": "Atelier modelaj lut, participant",
+            "cantitate": 3,
+            "pret": 95
+          }
+        ],
+        "total": 774
+      },
+      "tokeni": {
+        "intrare": 301,
+        "iesire": 155
+      },
+      "latentaMs": 45799.19212500006,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "20.pdf",
+      "factura": {
+        "furnizor": "TAMPLARIA LEMN DE STEJAR S.R.L.",
+        "cui": "33484829",
+        "data": "2026-12-15",
+        "linii": [
+          {
+            "produs": "Usa interior stejar masiv 80 cm",
+            "cantitate": 2,
+            "pret": 1450
+          },
+          {
+            "produs": "Toc reglabil 100-120 mm",
+            "cantitate": 2,
+            "pret": 385
+          },
+          {
+            "produs": "Montaj usa",
+            "cantitate": 2,
+            "pret": 250
+          },
+          {
+            "produs": "Balamale alama, set 3 buc",
+            "cantitate": 2,
+            "pret": 64.9
+          }
+        ],
+        "total": 4329.8
+      },
+      "tokeni": {
+        "intrare": 453,
+        "iesire": 258
+      },
+      "latentaMs": 21061.784374999814,
+      "model": "gemini-3.1-flash-lite",
+      "dinRezerva": false
+    }
+  ]
+}

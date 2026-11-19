@@ -43,3 +43,26 @@ export class ModelCarePica extends FakeToolCallingModel {
     });
   }
 }
+
+// Raspunde dupa textul facturii, cu { raw, parsed } dat pentru acel text, si tine minte textele primite.
+// Un text fara raspuns arunca, ca un provider care pica.
+export class ModelDupaText extends FakeToolCallingModel {
+  texte: string[] = [];
+  readonly raspunsuri: Record<string, { raw: BaseMessage; parsed: unknown }>;
+
+  constructor(raspunsuri: Record<string, { raw: BaseMessage; parsed: unknown }>) {
+    super();
+    this.raspunsuri = raspunsuri;
+  }
+
+  withStructuredOutput(_schema: unknown) {
+    return new RunnableLambda({
+      func: async (mesaje: unknown): Promise<{ raw: BaseMessage; parsed: unknown }> => {
+        const text = textPrimit(mesaje);
+        this.texte.push(text);
+        if (!(text in this.raspunsuri)) throw new Error(`text necunoscut: ${text}`);
+        return this.raspunsuri[text];
+      },
+    });
+  }
+}

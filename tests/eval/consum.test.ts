@@ -54,8 +54,22 @@ describe("sumarConsum", () => {
       extrase: 0,
       costMediu: null,
       latentaMedieMs: null,
+      latentaMedianaMs: null,
       latentaMaxMs: null,
     });
+  });
+
+  it("da mediana latentei pe extragerile reusite: mijlocul la numar impar, media celor doua din mijloc la numar par", () => {
+    const impar = sumarConsum([reusita("01.txt", 10, 5, 9000), esuata("02.txt"), reusita("03.txt", 10, 5, 1000), reusita("04.txt", 10, 5, 2000)]);
+    expect(impar.latentaMedianaMs).toBe(2000);
+    const par = sumarConsum([
+      reusita("01.txt", 10, 5, 4000),
+      reusita("02.txt", 10, 5, 1000),
+      reusita("03.txt", 10, 5, 300000),
+      reusita("04.txt", 10, 5, 3000),
+    ]);
+    expect(par.latentaMedianaMs).toBe(3500);
+    expect(par.latentaMedieMs).toBe(77000);
   });
 
   it("aduna facturile, tokenii si costul pe fiecare model care a raspuns, in ordinea primei aparitii", () => {

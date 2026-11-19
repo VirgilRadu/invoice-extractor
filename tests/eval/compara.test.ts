@@ -217,6 +217,16 @@ describe("sumarEval", () => {
     });
   });
 
+  it("numara controalele fiecarui camp si doar pe facturile extrase, fara extragerile esuate", () => {
+    const sumar = sumarEval(REZULTATE);
+    // fara 03: 2 facturi, 3 linii
+    expect(sumar.campuriExtrase.furnizor).toEqual({ corecte: 2, total: 2, acuratete: 1 });
+    expect(sumar.campuriExtrase.produs).toEqual({ corecte: 3, total: 3, acuratete: 1 });
+    expect(sumar.campuriExtrase.pret).toEqual({ corecte: 2, total: 3, acuratete: 2 / 3 });
+    const doarEsuata = sumarEval([{ fisier: "03.txt", asteptat: ASTEPTAT, eroare: "503" }]);
+    expect(doarEsuata.campuriExtrase.total).toEqual({ corecte: 0, total: 0, acuratete: 0 });
+  });
+
   it("numara toate controalele unei extrageri esuate ca gresite si pastreaza eroarea", () => {
     const sumar = sumarEval([{ fisier: "03.txt", asteptat: ASTEPTAT, eroare: "timeout" }]);
     for (const scor of Object.values(sumar.controale)) expect(scor.corecte).toBe(0);

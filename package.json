@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "eval": "tsx src/eval/ruleaza.ts",
     "eval:pdf": "tsx src/eval/ruleaza.ts pdf",
-    "pdf": "tsx src/genereaza-pdf.ts"
+    "pdf": "tsx src/genereaza-pdf.ts",
+    "compara": "tsx src/eval/comparatie.ts",
+    "compara:raport": "tsx src/eval/comparatie.ts raport"
   },
   "dependencies": {
     "@langchain/anthropic": "^1.6.4",

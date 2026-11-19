@@ -27,6 +27,7 @@ export type SumarConsum = {
   extrase: number;
   costMediu: number | null;
   latentaMedieMs: number | null;
+  latentaMedianaMs: number | null;
   latentaMaxMs: number | null;
 };
 
@@ -52,6 +53,14 @@ function consumPeModel(facturi: ConsumCuCost[]): ConsumModel[] {
   }));
 }
 
+// La numar par de valori, mediana este media celor doua din mijloc.
+function mediana(valori: number[]): number | null {
+  if (valori.length === 0) return null;
+  const sortate = [...valori].sort((a, b) => a - b);
+  const mijloc = Math.floor(sortate.length / 2);
+  return sortate.length % 2 === 1 ? sortate[mijloc] : (sortate[mijloc - 1] + sortate[mijloc]) / 2;
+}
+
 // Media costului si latenta se calculeaza doar pe extragerile reusite.
 export function sumarConsum(randuri: ConsumFactura[]): SumarConsum {
   const facturi = randuri.map((rand) => ({ ...rand, cost: costFactura(rand) }));
@@ -70,6 +79,7 @@ export function sumarConsum(randuri: ConsumFactura[]): SumarConsum {
     extrase,
     costMediu: cost === null || extrase === 0 ? null : cost / extrase,
     latentaMedieMs: extrase === 0 ? null : latente.reduce((acc, l) => acc + l, 0) / extrase,
+    latentaMedianaMs: mediana(latente),
     latentaMaxMs: extrase === 0 ? null : Math.max(...latente),
   };
 }

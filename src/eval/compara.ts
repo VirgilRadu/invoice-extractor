@@ -25,6 +25,8 @@ export type DetaliuFactura = { fisier: string; eroare?: string; esecuri: Esec[] 
 
 export type SumarEval = {
   controale: Record<Control, Scor>;
+  // Aceleasi controale pe camp, doar pe facturile extrase: o extragere esuata nu intra in ele.
+  campuriExtrase: Record<Control, Scor>;
   facturi: number;
   facturiComplete: number;
   corecte: number;
@@ -95,13 +97,25 @@ const acuratete = (corecte: number, total: number) => (total === 0 ? 0 : corecte
 
 // Controalele de factura se numara peste facturi, cele de linie peste liniile asteptate.
 // O extragere esuata are toate controalele gresite.
+const numaratoareGoala = () =>
+  Object.fromEntries([...CONTROALE_FACTURA, ...CONTROALE_LINIE].map((control) => [control, { corecte: 0, total: 0 }])) as Record<
+    Control,
+    { corecte: number; total: number }
+  >;
+
+const scoruri = (numaratoare: Record<Control, { corecte: number; total: number }>) =>
+  Object.fromEntries(
+    Object.entries(numaratoare).map(([control, { corecte, total }]) => [control, { corecte, total, acuratete: acuratete(corecte, total) }]),
+  ) as Record<Control, Scor>;
+
 export function sumarEval(rezultate: RezultatFactura[]): SumarEval {
-  const numaratoare = Object.fromEntries(
-    [...CONTROALE_FACTURA, ...CONTROALE_LINIE].map((control) => [control, { corecte: 0, total: 0 }]),
-  ) as Record<Control, { corecte: number; total: number }>;
-  const adauga = (control: Control, ok: boolean) => {
-    numaratoare[control].total += 1;
-    if (ok) numaratoare[control].corecte += 1;
+  const numaratoare = numaratoareGoala();
+  const extrase = numaratoareGoala();
+  const adauga = (control: Control, ok: boolean, extrasa = true) => {
+    for (const n of extrasa ? [numaratoare, extrase] : [numaratoare]) {
+      n[control].total += 1;
+      if (ok) n[control].corecte += 1;
+    }
   };
 
   let facturiComplete = 0;
@@ -110,8 +124,8 @@ export function sumarEval(rezultate: RezultatFactura[]): SumarEval {
   const detalii: DetaliuFactura[] = [];
   for (const rezultat of rezultate) {
     if ("eroare" in rezultat) {
-      for (const control of CONTROALE_FACTURA) adauga(control, false);
-      for (const _ of rezultat.asteptat.linii) for (const control of CONTROALE_LINIE) adauga(control, false);
+      for (const control of CONTROALE_FACTURA) adauga(control, false, false);
+      for (const _ of rezultat.asteptat.linii) for (const control of CONTROALE_LINIE) adauga(control, false, false);
       esuate += 1;
       controaleEsuate += CONTROALE_FACTURA.length + CONTROALE_LINIE.length * rezultat.asteptat.linii.length;
       detalii.push({ fisier: rezultat.fisier, eroare: rezultat.eroare, esecuri: [] });
@@ -124,18 +138,13 @@ export function sumarEval(rezultate: RezultatFactura[]): SumarEval {
     detalii.push({ fisier: rezultat.fisier, esecuri: comparatie.esecuri });
   }
 
-  const controale = Object.fromEntries(
-    Object.entries(numaratoare).map(([control, { corecte, total }]) => [
-      control,
-      { corecte, total, acuratete: acuratete(corecte, total) },
-    ]),
-  ) as Record<Control, Scor>;
-  const scoruri = Object.values(controale);
-  const corecte = scoruri.reduce((acc, scor) => acc + scor.corecte, 0);
-  const totalControale = scoruri.reduce((acc, scor) => acc + scor.total, 0);
+  const controale = scoruri(numaratoare);
+  const corecte = Object.values(controale).reduce((acc, scor) => acc + scor.corecte, 0);
+  const totalControale = Object.values(controale).reduce((acc, scor) => acc + scor.total, 0);
 
   return {
     controale,
+    campuriExtrase: scoruri(extrase),
     facturi: rezultate.length,
     facturiComplete,
     corecte,

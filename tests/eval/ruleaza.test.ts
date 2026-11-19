@@ -8,7 +8,17 @@ import { creeazaExtractor, type Extractor, type RezultatExtragere } from "../../
 import type { Factura } from "../../src/schema.js";
 import type { CodValidare } from "../../src/validare.js";
 import { raportEval } from "../../src/eval/raport.js";
-import { caiPentruSet, DATA_REFERINTA_SET, ruleaza, ruleazaEval, type OptiuniEval } from "../../src/eval/ruleaza.js";
+import {
+  caiAsteptate,
+  caiPentruSet,
+  citesteSetul,
+  DATA_REFERINTA_SET,
+  noteazaSetul,
+  ruleaza,
+  ruleazaEval,
+  type ExtragereBruta,
+  type OptiuniEval,
+} from "../../src/eval/ruleaza.js";
 import { pdfDinText } from "../../src/genereaza-pdf.js";
 import { textDinPdf } from "../../src/pdf.js";
 import { ModelCarePica, ModelCareRaspunde } from "../modele-false.js";
@@ -529,6 +539,82 @@ describe("ruleazaEval", () => {
       const raport = await readFile(fisierIesire, "utf8");
       expect(raport).toContain("- Intrare: date/pdf (PDF)\n");
       expect(raport).toContain("| 01.pdf | gemini-3.5-flash-lite | 11/11 | 1000 | 200 |");
+    });
+  });
+
+  describe("extragerile brute si notarea lor", () => {
+    const LITE = "gemini-3.5-flash-lite";
+    const extrage: Extractor = async (text) => {
+      const factura = { "TEXT UNU": { ...UNU, total: 1 }, "TEXT TREI": { ...DOI, data: "2026-11-20" } }[text];
+      if (!factura) throw new Error("503 Service Unavailable");
+      return { factura: structuredClone(factura), tokeni: { intrare: 1000, iesire: 200 }, latentaMs: 1234.5, model: LITE, dinRezerva: false };
+    };
+
+    async function scrieSetul() {
+      await scrie("01", "TEXT UNU", UNU);
+      await scrie("02", "TEXT STRICAT", DOI);
+      await scrie("03", "TEXT TREI", { ...DOI, data: "2026-11-20" }, ["data_in_viitor"]);
+    }
+
+    it("intoarce, in ordinea fisierelor, ce a intors extractorul pentru fiecare factura sau eroarea lui", async () => {
+      await scrieSetul();
+
+      const { brute } = await ruleazaEval(optiuni(extrage));
+
+      expect(brute).toEqual([
+        { fisier: "01.txt", factura: { ...UNU, total: 1 }, tokeni: { intrare: 1000, iesire: 200 }, latentaMs: 1234.5, model: LITE, dinRezerva: false },
+        { fisier: "02.txt", eroare: "503 Service Unavailable" },
+        {
+          fisier: "03.txt",
+          factura: { ...DOI, data: "2026-11-20" },
+          tokeni: { intrare: 1000, iesire: 200 },
+          latentaMs: 1234.5,
+          model: LITE,
+          dinRezerva: false,
+        },
+      ]);
+    });
+
+    it("noteaza extragerile salvate la fel ca rularea care le-a produs, fara extractor", async () => {
+      await scrieSetul();
+      const { brute, ...live } = await ruleazaEval(optiuni(extrage));
+
+      const set = await citesteSetul({ dirFacturi, dirAsteptat, fisierCoduriAsteptate, dataReferinta });
+      const dinSalvate = noteazaSetul(set, JSON.parse(JSON.stringify(brute)) as ExtragereBruta[], dataReferinta);
+
+      expect(dinSalvate).toEqual(live);
+      expect(dinSalvate.sumar).toMatchObject({ facturi: 3, esuate: 1, facturiComplete: 1 });
+      expect(dinSalvate.validare).toMatchObject({ gresiteSemnalate: 1, corecteOk: 0 });
+    });
+
+    it("citeste setul cu textul, valoarea si codurile asteptate ale fiecarei facturi", async () => {
+      await scrieSetul();
+      expect(await citesteSetul({ dirFacturi, dirAsteptat, fisierCoduriAsteptate, dataReferinta })).toEqual([
+        { fisier: "01.txt", text: "TEXT UNU", asteptat: UNU, coduriAsteptate: [] },
+        { fisier: "02.txt", text: "TEXT STRICAT", asteptat: DOI, coduriAsteptate: [] },
+        { fisier: "03.txt", text: "TEXT TREI", asteptat: { ...DOI, data: "2026-11-20" }, coduriAsteptate: ["data_in_viitor"] },
+      ]);
+    });
+
+    it("arunca la notare cand extragerile nu sunt ale setului: alt numar de facturi sau alt fisier", async () => {
+      await scrieSetul();
+      const set = await citesteSetul({ dirFacturi, dirAsteptat, fisierCoduriAsteptate, dataReferinta });
+      const eroare = (fisier: string): ExtragereBruta => ({ fisier, eroare: "503" });
+
+      expect(() => noteazaSetul(set, [eroare("01.txt"), eroare("02.txt")], dataReferinta)).toThrow(/01\.txt, 02\.txt.*01\.txt, 02\.txt, 03\.txt/);
+      expect(() => noteazaSetul(set, [eroare("01.txt"), eroare("03.txt"), eroare("02.txt")], dataReferinta)).toThrow(
+        /01\.txt, 03\.txt, 02\.txt.*01\.txt, 02\.txt, 03\.txt/,
+      );
+    });
+  });
+
+  describe("caiAsteptate", () => {
+    it("ia valorile din date/asteptat si codurile din date/asteptat-validare.json, pentru text si PDF", () => {
+      const cale = (relativ: string) => fileURLToPath(new URL(`../../${relativ}`, import.meta.url));
+      expect(caiAsteptate()).toEqual({
+        dirAsteptat: cale("date/asteptat/"),
+        fisierCoduriAsteptate: cale("date/asteptat-validare.json"),
+      });
     });
   });
 

@@ -7,7 +7,7 @@ import { setTimeout as pauza } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { z } from "zod";
 import { citesteFacturi, setDinArgumente, type SetIntrare } from "../citire.js";
-import { PAUZA_INTRE_APELURI_MS, type Extractor } from "../extractor.js";
+import { PAUZA_INTRE_APELURI_MS, type Extractor, type RezultatExtragere } from "../extractor.js";
 import { formatCost } from "../lib/cost.js";
 import { descriereModele, extractorDinModele, modeleDinMediu, numeModele } from "../model.js";
 import { SchemaFactura, type Factura } from "../schema.js";
@@ -39,6 +39,14 @@ export type OptiuniEval = {
 };
 
 export type RezultatEval = { sumar: SumarEval; consum: SumarConsum; validare: SumarValidare };
+
+// O factura a setului, cu valoarea si codurile pe care eval-ul le asteapta de la ea.
+export type FacturaSet = { fisier: string; text: string; asteptat: Factura; coduriAsteptate: CodValidare[] };
+
+// Ce a intors extractorul pentru o factura, rezultatul sau eroarea; din ele notarea se reface fara apeluri la model.
+export type ExtragereBruta = ({ fisier: string } & RezultatExtragere) | { fisier: string; eroare: string };
+
+type OptiuniSet = Pick<OptiuniEval, "dirFacturi" | "dirAsteptat" | "fisierCoduriAsteptate" | "dataReferinta">;
 
 const SchemaCoduri = z.record(z.string(), z.array(z.enum(CODURI_VALIDARE)));
 
@@ -76,18 +84,13 @@ async function citesteCoduriAsteptate(fisier: string): Promise<Record<string, Co
 
 const coduri = (lista: CodValidare[]) => (lista.length === 0 ? "ok" : lista.join(", "));
 
-// Data de referinta, valorile si codurile asteptate se verifica inainte de primul apel la model;
-// o extragere esuata se noteaza si se continua.
-export async function ruleazaEval({
-  extrage,
+// Data de referinta, valorile si codurile asteptate se verifica inainte de primul apel la model.
+export async function citesteSetul({
   dirFacturi,
   dirAsteptat,
   fisierCoduriAsteptate,
   dataReferinta,
-  pauzaMs,
-  log,
-  asteapta = (ms) => pauza(ms),
-}: OptiuniEval): Promise<RezultatEval> {
+}: OptiuniSet): Promise<FacturaSet[]> {
   verificaZiuaDeReferinta(dataReferinta);
   const documente = await citesteFacturi(dirFacturi);
   // NN.txt si NN.pdf au aceeasi valoare asteptata, NN.json, si aceleasi coduri, pe cheia NN.
@@ -95,44 +98,80 @@ export async function ruleazaEval({
     documente.map(({ fisier }) => citesteAsteptat(join(dirAsteptat, `${parse(fisier).name}.json`))),
   );
   const toateCodurile = await citesteCoduriAsteptate(fisierCoduriAsteptate);
-  const coduriAsteptate = documente.map(({ fisier }) => {
-    const lista = toateCodurile[parse(fisier).name];
-    if (lista === undefined) throw new Error(`${fisierCoduriAsteptate}: lipsesc codurile asteptate pentru ${fisier}`);
-    return lista;
+  return documente.map(({ fisier, text }, index) => {
+    const coduriAsteptate = toateCodurile[parse(fisier).name];
+    if (coduriAsteptate === undefined) throw new Error(`${fisierCoduriAsteptate}: lipsesc codurile asteptate pentru ${fisier}`);
+    return { fisier, text, asteptat: asteptate[index], coduriAsteptate };
   });
+}
 
-  const rezultate: RezultatFactura[] = [];
-  const consum: ConsumFactura[] = [];
-  const validari: ValidareFactura[] = [];
-  for (const [index, { fisier, text }] of documente.entries()) {
-    if (index > 0) await asteapta(pauzaMs);
-    const asteptat = asteptate[index];
-    const controale = CONTROALE_FACTURA.length + CONTROALE_LINIE.length * asteptat.linii.length;
-    try {
-      const { factura, tokeni, latentaMs, model, dinRezerva } = await extrage(text);
-      const corecte = controale - comparaFactura(asteptat, factura).esecuri.length;
-      const obtinute = valideazaFactura(factura, dataReferinta).map(({ cod }) => cod);
-      log(
-        `${fisier}: ${corecte}/${controale} controale corecte, model ${model}, tokeni ${tokeni.intrare} intrare / ` +
-          `${tokeni.iesire} iesire, ${Math.round(latentaMs)} ms, ` +
-          `validare: ${coduri(obtinute)} (asteptat: ${coduri(coduriAsteptate[index])})`,
-      );
-      rezultate.push({ fisier, asteptat, obtinut: factura });
-      consum.push({ fisier, corecte, controale, tokeni, latentaMs, model, dinRezerva });
-      validari.push({ fisier, asteptate: coduriAsteptate[index], obtinute });
-    } catch (eroare) {
-      const mesaj = eroare instanceof Error ? eroare.message : String(eroare);
-      log(`${fisier}: extragere esuata: ${mesaj}`);
-      rezultate.push({ fisier, asteptat, eroare: mesaj });
-      consum.push({ fisier, corecte: 0, controale, tokeni: { intrare: 0, iesire: 0 }, latentaMs: null, model: null, dinRezerva: false });
-      validari.push({ fisier, asteptate: coduriAsteptate[index], obtinute: null });
-    }
+type NotaFactura = { rezultat: RezultatFactura; consum: ConsumFactura; validare: ValidareFactura };
+
+function noteazaFactura({ fisier, asteptat, coduriAsteptate }: FacturaSet, bruta: ExtragereBruta, dataReferinta: string): NotaFactura {
+  const controale = CONTROALE_FACTURA.length + CONTROALE_LINIE.length * asteptat.linii.length;
+  if ("eroare" in bruta) {
+    return {
+      rezultat: { fisier, asteptat, eroare: bruta.eroare },
+      consum: { fisier, corecte: 0, controale, tokeni: { intrare: 0, iesire: 0 }, latentaMs: null, model: null, dinRezerva: false },
+      validare: { fisier, asteptate: coduriAsteptate, obtinute: null },
+    };
   }
+  const { factura, tokeni, latentaMs, model, dinRezerva } = bruta;
+  const obtinute = valideazaFactura(factura, dataReferinta).map(({ cod }) => cod);
   return {
-    sumar: sumarEval(rezultate),
-    consum: sumarConsum(consum),
-    validare: sumarValidare(validari, dataReferinta),
+    rezultat: { fisier, asteptat, obtinut: factura },
+    consum: { fisier, corecte: controale - comparaFactura(asteptat, factura).esecuri.length, controale, tokeni, latentaMs, model, dinRezerva },
+    validare: { fisier, asteptate: coduriAsteptate, obtinute },
   };
+}
+
+function linieLog(bruta: ExtragereBruta, { consum, validare }: NotaFactura): string {
+  if ("eroare" in bruta) return `${bruta.fisier}: extragere esuata: ${bruta.eroare}`;
+  const { tokeni, latentaMs, model } = bruta;
+  return (
+    `${bruta.fisier}: ${consum.corecte}/${consum.controale} controale corecte, model ${model}, tokeni ${tokeni.intrare} intrare / ` +
+    `${tokeni.iesire} iesire, ${Math.round(latentaMs)} ms, ` +
+    `validare: ${coduri(validare.obtinute ?? [])} (asteptat: ${coduri(validare.asteptate)})`
+  );
+}
+
+const fisiere = (lista: { fisier: string }[]) => lista.map(({ fisier }) => fisier).join(", ");
+
+// Aceeasi notare pentru o rulare noua si pentru extragerile salvate; extragerile trebuie sa fie ale setului, in ordine.
+export function noteazaSetul(set: FacturaSet[], brute: ExtragereBruta[], dataReferinta: string): RezultatEval {
+  if (fisiere(brute) !== fisiere(set)) {
+    throw new Error(`Extragerile sunt pentru ${fisiere(brute)}, setul are ${fisiere(set)}`);
+  }
+  const note = set.map((factura, index) => noteazaFactura(factura, brute[index], dataReferinta));
+  return {
+    sumar: sumarEval(note.map(({ rezultat }) => rezultat)),
+    consum: sumarConsum(note.map(({ consum }) => consum)),
+    validare: sumarValidare(note.map(({ validare }) => validare), dataReferinta),
+  };
+}
+
+// O extragere esuata se noteaza si se continua; facturile se extrag pe rand, cu pauzaMs intre ele.
+export async function ruleazaEval({
+  extrage,
+  pauzaMs,
+  log,
+  asteapta = (ms) => pauza(ms),
+  ...optiuniSet
+}: OptiuniEval): Promise<RezultatEval & { brute: ExtragereBruta[] }> {
+  const set = await citesteSetul(optiuniSet);
+  const brute: ExtragereBruta[] = [];
+  for (const [index, factura] of set.entries()) {
+    if (index > 0) await asteapta(pauzaMs);
+    let bruta: ExtragereBruta;
+    try {
+      bruta = { fisier: factura.fisier, ...(await extrage(factura.text)) };
+    } catch (eroare) {
+      bruta = { fisier: factura.fisier, eroare: eroare instanceof Error ? eroare.message : String(eroare) };
+    }
+    brute.push(bruta);
+    log(linieLog(bruta, noteazaFactura(factura, bruta, optiuniSet.dataReferinta)));
+  }
+  return { ...noteazaSetul(set, brute, optiuniSet.dataReferinta), brute };
 }
 
 export type OptiuniRulareEval = OptiuniEval & MetaRaport & { fisierIesire: string };
@@ -184,6 +223,12 @@ export function caiPentruSet(set: SetIntrare): { dirFacturi: string; fisierIesir
   };
 }
 
+// Valorile si codurile asteptate, aceleasi pentru text si PDF.
+export const caiAsteptate = () => ({
+  dirAsteptat: fileURLToPath(new URL("../../date/asteptat/", import.meta.url)),
+  fisierCoduriAsteptate: fileURLToPath(new URL("../../date/asteptat-validare.json", import.meta.url)),
+});
+
 // .env se incarca doar cand fisierul e rulat ca script, niciodata la import.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const cai = caiPentruSet(setDinArgumente(process.argv.slice(2)));
@@ -194,8 +239,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   await ruleaza({
     extrage: extractorDinModele(modele),
     ...cai,
-    dirAsteptat: fileURLToPath(new URL("../../date/asteptat/", import.meta.url)),
-    fisierCoduriAsteptate: fileURLToPath(new URL("../../date/asteptat-validare.json", import.meta.url)),
+    ...caiAsteptate(),
     dataReferinta: DATA_REFERINTA_SET,
     pauzaMs: PAUZA_INTRE_APELURI_MS,
     log: console.log,

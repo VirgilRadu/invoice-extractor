@@ -1,0 +1,592 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "rulare": 1,
+  "inceput": "2026-11-19T16:24:56.957Z",
+  "intrare": "date/pdf (PDF, textul paginilor citit cu pdfjs-dist)",
+  "dataReferinta": "2026-11-12",
+  "reincercari": 2,
+  "pauzaMs": 4500,
+  "facturi": [
+    {
+      "fisier": "01.pdf",
+      "factura": {
+        "furnizor": "ATELIERUL VERDE FLORAL S.R.L.",
+        "cui": "RO45187325",
+        "data": "2026-10-14",
+        "linii": [
+          {
+            "produs": "Ghiveci ceramic 20 cm",
+            "cantitate": 2,
+            "pret": 45.5
+          },
+          {
+            "produs": "Pământ pentru flori 10 l",
+            "cantitate": 3,
+            "pret": 18.9
+          },
+          {
+            "produs": "Orhidee Phalaenopsis albă",
+            "cantitate": 1,
+            "pret": 89.99
+          }
+        ],
+        "total": 237.69
+      },
+      "tokeni": {
+        "intrare": 408,
+        "iesire": 576
+      },
+      "latentaMs": 34592.764124999754,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "02.pdf",
+      "factura": {
+        "furnizor": "MINIMARKET LA DOI PASI S.R.L.",
+        "cui": "RO38714023",
+        "data": "2026-11-03",
+        "linii": [
+          {
+            "produs": "MERE IONATAN",
+            "cantitate": 1.25,
+            "pret": 8.8
+          },
+          {
+            "produs": "LAPTE 3,5% GRASIME 1 L",
+            "cantitate": 2,
+            "pret": 6.49
+          },
+          {
+            "produs": "CASCAVAL DALIA FELIAT",
+            "cantitate": 0.64,
+            "pret": 42.5
+          },
+          {
+            "produs": "PAINE INTEGRALA 500 G",
+            "cantitate": 1,
+            "pret": 4.35
+          },
+          {
+            "produs": "APA PLATA 2 L",
+            "cantitate": 3,
+            "pret": 2.99
+          }
+        ],
+        "total": 64.5
+      },
+      "tokeni": {
+        "intrare": 412,
+        "iesire": 1593
+      },
+      "latentaMs": 27528.473083000164,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "03.pdf",
+      "factura": {
+        "furnizor": "DIGITAL SOFT LABS S.R.L.",
+        "cui": "21945678",
+        "data": "2026-09-22",
+        "linii": [
+          {
+            "produs": "Dezvoltare modul raportare vanzari",
+            "cantitate": 1,
+            "pret": 4235
+          },
+          {
+            "produs": "Mentenanta aplicatie (luna)",
+            "cantitate": 3,
+            "pret": 1210
+          }
+        ],
+        "total": 7865
+      },
+      "tokeni": {
+        "intrare": 398,
+        "iesire": 1294
+      },
+      "latentaMs": 117277.314334,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "04.pdf",
+      "eroare": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+    },
+    {
+      "fisier": "05.pdf",
+      "factura": {
+        "furnizor": "PETROL EXPRES DRUMUL MARE SRL",
+        "cui": "33928174",
+        "data": "2026-11-05",
+        "linii": [
+          {
+            "produs": "MOTORINA STANDARD",
+            "cantitate": 42.37,
+            "pret": 7.89
+          }
+        ],
+        "total": 334.3
+      },
+      "tokeni": {
+        "intrare": 209,
+        "iesire": 368
+      },
+      "latentaMs": 311932.8901250004,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "06.pdf",
+      "factura": {
+        "furnizor": "PAPETARIA BIROUL VESEL S.R.L.",
+        "cui": "RO28431054",
+        "data": "2026-09-30",
+        "linii": [
+          {
+            "produs": "Hârtie copiator A4 \"Premium\" 80 g",
+            "cantitate": 5,
+            "pret": 27.9
+          },
+          {
+            "produs": "Pix cu gel, albastru",
+            "cantitate": 20,
+            "pret": 3.4
+          },
+          {
+            "produs": "Dosar plic transparent",
+            "cantitate": 4,
+            "pret": 11.25
+          },
+          {
+            "produs": "Biblioraft 7,5 cm",
+            "cantitate": 6,
+            "pret": 14.8
+          },
+          {
+            "produs": "Capsator metalic \"Office 24\"",
+            "cantitate": 1,
+            "pret": 36.5
+          },
+          {
+            "produs": "Capse 24/6, cutie 1000 buc",
+            "cantitate": 3,
+            "pret": 4.99
+          },
+          {
+            "produs": "Post-it 76x76 mm, galben",
+            "cantitate": 2,
+            "pret": 17.6
+          },
+          {
+            "produs": "Marker permanent negru",
+            "cantitate": 8,
+            "pret": 5.25
+          }
+        ],
+        "total": 469.97
+      },
+      "tokeni": {
+        "intrare": 472,
+        "iesire": 1036
+      },
+      "latentaMs": 31208.989541999996,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "07.pdf",
+      "factura": {
+        "furnizor": "GRADINA DE SUS PRODUCTIE S.R.L.",
+        "cui": "RO44102762",
+        "data": "2026-08-17",
+        "linii": [
+          {
+            "produs": "Rasaduri rosii cherry, tava 12 buc",
+            "cantitate": 7,
+            "pret": 24
+          },
+          {
+            "produs": "Ierburi aromatice la ghiveci",
+            "cantitate": 15,
+            "pret": 9.5
+          },
+          {
+            "produs": "Ingrasamant organic 5 kg",
+            "cantitate": 2,
+            "pret": 47.9
+          }
+        ],
+        "total": 406.3
+      },
+      "tokeni": {
+        "intrare": 386,
+        "iesire": 913
+      },
+      "latentaMs": 289158.47895799996,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "08.pdf",
+      "factura": {
+        "furnizor": "FARMACIA SALCAMUL VERDE SRL",
+        "cui": "37205811",
+        "data": "2026-11-11",
+        "linii": [
+          {
+            "produs": "VITAMINA C 1000 MG, 30 CPR",
+            "cantitate": 2,
+            "pret": 24.9
+          },
+          {
+            "produs": "SIROP TUSE PLANTE 150 ML",
+            "cantitate": 1,
+            "pret": 31.45
+          },
+          {
+            "produs": "PLASTURI ELASTICE 20 BUC",
+            "cantitate": 3,
+            "pret": 7.6
+          },
+          {
+            "produs": "UNGUENT GALBENELE 50 G",
+            "cantitate": 1,
+            "pret": 16.2
+          }
+        ],
+        "total": 120.25
+      },
+      "tokeni": {
+        "intrare": 345,
+        "iesire": 1304
+      },
+      "latentaMs": 248895.82508300012,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "09.pdf",
+      "factura": {
+        "furnizor": "MATERIALE CONSTRUCTII PIATRA ALBA S.R.L.",
+        "cui": "RO26173943",
+        "data": "2026-09-02",
+        "linii": [
+          {
+            "produs": "Ciment Portland 40 kg",
+            "cantitate": 50,
+            "pret": 38.9
+          },
+          {
+            "produs": "Otel beton PC52, diametru 10 mm",
+            "cantitate": 1250,
+            "pret": 6.15
+          },
+          {
+            "produs": "Nisip spalat 0-4 mm",
+            "cantitate": 2.5,
+            "pret": 145
+          },
+          {
+            "produs": "Caramida plina 240x115x63",
+            "cantitate": 400,
+            "pret": 2.35
+          }
+        ],
+        "total": 10935
+      },
+      "tokeni": {
+        "intrare": 447,
+        "iesire": 1565
+      },
+      "latentaMs": 207971.50279199984,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "10.pdf",
+      "factura": {
+        "furnizor": "BRUTARIA CUPTORUL BUNICII SRL",
+        "cui": "41528039",
+        "data": "2026-11-10",
+        "linii": [
+          {
+            "produs": "COVRIGI CU SARE, PUNGA 5 BUC",
+            "cantitate": 2,
+            "pret": 5.5
+          },
+          {
+            "produs": "CORNULETE CU MAGIUN",
+            "cantitate": 6,
+            "pret": 2.2
+          },
+          {
+            "produs": "PAINE DE CASA 800G",
+            "cantitate": 1,
+            "pret": 9.8
+          }
+        ],
+        "total": 34
+      },
+      "tokeni": {
+        "intrare": 227,
+        "iesire": 696
+      },
+      "latentaMs": 3714.503332999535,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "11.pdf",
+      "factura": {
+        "furnizor": "CONTA EXACT EXPERT S.R.L.",
+        "cui": "215476",
+        "data": "2026-10-31",
+        "linii": [
+          {
+            "produs": "Servicii contabilitate, luna octombrie 2026",
+            "cantitate": 1,
+            "pret": 1815
+          },
+          {
+            "produs": "Consultanță fiscală suplimentară",
+            "cantitate": 7.5,
+            "pret": 145.2
+          },
+          {
+            "produs": "Întocmire declarații, situații lunare",
+            "cantitate": 2,
+            "pret": 121
+          }
+        ],
+        "total": 3146
+      },
+      "tokeni": {
+        "intrare": 309,
+        "iesire": 731
+      },
+      "latentaMs": 3528.441708000377,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "12.pdf",
+      "factura": {
+        "furnizor": "FERMA \"DEALUL INSORIT\" S.R.L.",
+        "cui": "RO30657194",
+        "data": "2026-10-07",
+        "linii": [
+          {
+            "produs": "Miere de salcam 1 kg",
+            "cantitate": 4,
+            "pret": 52
+          },
+          {
+            "produs": "Branza de burduf, 500 g",
+            "cantitate": 3,
+            "pret": 38.5
+          },
+          {
+            "produs": "Telemea de oaie",
+            "cantitate": 1.5,
+            "pret": 44
+          },
+          {
+            "produs": "Oua de tara",
+            "cantitate": 10,
+            "pret": 1.6
+          },
+          {
+            "produs": "Lapte de oaie",
+            "cantitate": 2,
+            "pret": 12
+          }
+        ],
+        "total": 429.5
+      },
+      "tokeni": {
+        "intrare": 333,
+        "iesire": 930
+      },
+      "latentaMs": 30803.03566700034,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "13.pdf",
+      "factura": {
+        "furnizor": "FIERARIA DIN COLT SRL",
+        "cui": "RO24791506",
+        "data": "2026-11-09",
+        "linii": [
+          {
+            "produs": "SURUBURI LEMN 4X40 (100 BUC)",
+            "cantitate": 2,
+            "pret": 9.9
+          },
+          {
+            "produs": "DIBLURI 6 MM (50 BUC)",
+            "cantitate": 1,
+            "pret": 7.5
+          },
+          {
+            "produs": "BANDA IZOLIERE NEAGRA",
+            "cantitate": 3,
+            "pret": 4.5
+          },
+          {
+            "produs": "LACAT ALAMA 40 MM",
+            "cantitate": 1,
+            "pret": 34
+          }
+        ],
+        "total": 74.8
+      },
+      "tokeni": {
+        "intrare": 263,
+        "iesire": 1178
+      },
+      "latentaMs": 24649.737124999985,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "14.pdf",
+      "factura": {
+        "furnizor": "AUTO SERVICE ROTILA S.R.L.",
+        "cui": "RO42933862",
+        "data": "2026-08-20",
+        "linii": [
+          {
+            "produs": "Ulei motor 5W-30, 4 l",
+            "cantitate": 1,
+            "pret": 219
+          },
+          {
+            "produs": "Filtru ulei",
+            "cantitate": 1,
+            "pret": 54.9
+          },
+          {
+            "produs": "Filtru aer",
+            "cantitate": 1,
+            "pret": 72.4
+          },
+          {
+            "produs": "Plăcuțe frână față, set",
+            "cantitate": 1,
+            "pret": 289
+          },
+          {
+            "produs": "Manoperă service",
+            "cantitate": 2.5,
+            "pret": 181.5
+          }
+        ],
+        "total": 1089.05
+      },
+      "tokeni": {
+        "intrare": 450,
+        "iesire": 1736
+      },
+      "latentaMs": 29936.85145800002,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "15.pdf",
+      "factura": {
+        "furnizor": "PENSIUNEA DOUA BRAZI S.R.L.",
+        "cui": "39146282",
+        "data": "2026-07-06",
+        "linii": [
+          {
+            "produs": "Cazare camera dubla / noapte",
+            "cantitate": 3,
+            "pret": 320
+          },
+          {
+            "produs": "Mic dejun / persoana",
+            "cantitate": 6,
+            "pret": 35
+          },
+          {
+            "produs": "Taxa de statiune / persoana / zi",
+            "cantitate": 6,
+            "pret": 2.5
+          },
+          {
+            "produs": "Minibar - apa minerala",
+            "cantitate": 2,
+            "pret": 8
+          }
+        ],
+        "total": 1201
+      },
+      "tokeni": {
+        "intrare": 395,
+        "iesire": 651
+      },
+      "latentaMs": 3654.6982079995796,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "16.pdf",
+      "factura": {
+        "furnizor": "PET SHOP LABUTE VESELE S.R.L.",
+        "cui": "RO36448332",
+        "data": "2026-10-21",
+        "linii": [
+          {
+            "produs": "Hrana uscata caini adulti 12 kg",
+            "cantitate": 1,
+            "pret": 239.9
+          },
+          {
+            "produs": "Nisip pisici bentonita 10 l",
+            "cantitate": 3,
+            "pret": 34.5
+          },
+          {
+            "produs": "Zgarda reglabila nylon M",
+            "cantitate": 2,
+            "pret": 27.8
+          },
+          {
+            "produs": "Recompense dentare caini, 7 buc",
+            "cantitate": 4,
+            "pret": 18.25
+          }
+        ],
+        "total": 427
+      },
+      "tokeni": {
+        "intrare": 447,
+        "iesire": 975
+      },
+      "latentaMs": 44576.50066700019,
+      "model": "gemini-3-flash-preview",
+      "dinRezerva": false
+    },
+    {
+      "fisier": "17.pdf",
+      "eroare": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent: [429 Too Many Requests] You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 15h3m52.517458945s. [{\"@type\":\"type.googleapis.com/google.rpc.Help\",\"links\":[{\"description\":\"Learn more about Gemini API quotas\",\"url\":\"https://aistudio.google.com/docs/rate-limits\"}]},{\"@type\":\"type.googleapis.com/google.rpc.QuotaFailure\",\"violations\":[{\"description\":\"Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\",\"quotaMetric\":\"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\"quotaId\":\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\"quotaDimensions\":{\"model\":\"gemini-3-flash\",\"location\":\"global\"},\"quotaValue\":\"20\"}]},{\"@type\":\"type.googleapis.com/google.rpc.RetryInfo\",\"retryDelay\":\"54232s\"}]"
+    },
+    {
+      "fisier": "18.pdf",
+      "eroare": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent: [429 Too Many Requests] You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 15h3m47.718962039s. [{\"@type\":\"type.googleapis.com/google.rpc.Help\",\"links\":[{\"description\":\"Learn more about Gemini API quotas\",\"url\":\"https://aistudio.google.com/docs/rate-limits\"}]},{\"@type\":\"type.googleapis.com/google.rpc.QuotaFailure\",\"violations\":[{\"description\":\"Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\",\"quotaMetric\":\"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\"quotaId\":\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\"quotaDimensions\":{\"model\":\"gemini-3-flash\",\"location\":\"global\"},\"quotaValue\":\"20\"}]},{\"@type\":\"type.googleapis.com/google.rpc.RetryInfo\",\"retryDelay\":\"54227s\"}]"
+    },
+    {
+      "fisier": "19.pdf",
+      "eroare": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent: [429 Too Many Requests] You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 15h3m42.912389501s. [{\"@type\":\"type.googleapis.com/google.rpc.Help\",\"links\":[{\"description\":\"Learn more about Gemini API quotas\",\"url\":\"https://aistudio.google.com/docs/rate-limits\"}]},{\"@type\":\"type.googleapis.com/google.rpc.QuotaFailure\",\"violations\":[{\"description\":\"Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\",\"quotaMetric\":\"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\"quotaId\":\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\"quotaDimensions\":{\"location\":\"global\",\"model\":\"gemini-3-flash\"},\"quotaValue\":\"20\"}]},{\"@type\":\"type.googleapis.com/google.rpc.RetryInfo\",\"retryDelay\":\"54222s\"}]"
+    },
+    {
+      "fisier": "20.pdf",
+      "eroare": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent: [429 Too Many Requests] You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 15h3m38.106305629s. [{\"@type\":\"type.googleapis.com/google.rpc.Help\",\"links\":[{\"description\":\"Learn more about Gemini API quotas\",\"url\":\"https://aistudio.google.com/docs/rate-limits\"}]},{\"@type\":\"type.googleapis.com/google.rpc.QuotaFailure\",\"violations\":[{\"description\":\"Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\",\"quotaMetric\":\"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\"quotaId\":\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\"quotaDimensions\":{\"model\":\"gemini-3-flash\",\"location\":\"global\"},\"quotaValue\":\"20\"}]},{\"@type\":\"type.googleapis.com/google.rpc.RetryInfo\",\"retryDelay\":\"54218s\"}]"
+    }
+  ]
+}

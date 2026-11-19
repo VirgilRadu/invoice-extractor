@@ -87,7 +87,7 @@ flowchart TD
     evalr[src/eval/ruleaza.ts<br/>pnpm eval] --> extractor
     evalr --> compara[src/eval/compara.ts]
     evalr --> cost[src/lib/cost.ts]
-    comp[src/eval/provideri.ts<br/>pnpm compara] --> evalr
+    comp[src/eval/comparatie.ts<br/>pnpm compara] --> evalr
 ```
 
 | Command | Does |
@@ -97,7 +97,8 @@ flowchart TD
 | `pnpm eval` | runs the eval set, writes `rezultate/eval.md` (accuracy + tokens + cost + latency) |
 | `pnpm eval:pdf` | same on the PDF copies, writes `rezultate/eval-pdf.md` |
 | `pnpm pdf` | dev-only: writes `date/pdf/NN.pdf` from `date/facturi/NN.txt` |
-| `pnpm compara` | same eval on 2-3 providers, writes `rezultate/comparatie.md` |
+| `pnpm compara` | the `eval:pdf` eval once per model run (list in `src/eval/comparatie.ts`, or `COMPARA_MODELE=model:n,...`), saves each run in `rezultate/comparatie/`, writes `rezultate/comparatie.md`; `pnpm compara <model> <n>` redoes one run |
+| `pnpm compara:raport` | rebuilds `rezultate/comparatie.md` from the saved runs, no model calls |
 | `pnpm test` | offline tests, no API key |
 | `pnpm typecheck` | `tsc --noEmit` |
 
@@ -130,8 +131,8 @@ Each slice is test-first and ends in a command that shows the result.
 | 5 | `withFallbacks` (primary `gemini-3.5-flash-lite`, reserve `gemini-3.1-flash-lite`), answering model per invoice in the report | offline test: primary throws, reserve answers; then live `pnpm eval` and `pnpm start` on all 20 | done |
 | | **Bun** — tag `bun`, same commit | | reached |
 | 6 | PDF input with `pdfjs-dist`; `pnpm pdf` writes the PDFs from the txt set | `pnpm eval:pdf` → `rezultate/eval-pdf.md`, `pnpm start:pdf` → `rezultate/facturi-pdf.csv` | done |
-| 7 | Comparison on 2-3 providers | `rezultate/comparatie.md`: accuracy per field, cost, latency | todo |
-| | **Avansat** — tag `avansat` | | |
+| 7 | Comparison of 3 Gemini models on the PDF set | `pnpm compara` → `rezultate/comparatie.md`: accuracy per field, cost, latency | done |
+| | **Avansat** — tag `avansat`, set at the slice 7 commit | | reached |
 | 8 | Final README | level reached, eval results, cost, what did not work, what to add after L13-18 | todo |
 
 ### How a slice is run
@@ -168,7 +169,7 @@ Verifier:
 
 ## 6. State and next steps
 
-Slices 0-6 are done, independently verified and pushed. Levels **Minim** and **Bun** are met; **Avansat** needs slice 7. Left: slice 7 (comparison), slice 8 (README).
+Slices 0-7 are done, independently verified and pushed. Levels **Minim**, **Bun** and **Avansat** are met. Left: slice 8 (README).
 
 ### To resume
 
@@ -181,6 +182,7 @@ Slices 0-6 are done, independently verified and pushed. Levels **Minim** and **B
 
 - **Slice 6, where the PDFs come from:** a dev-only script writes `date/pdf/NN.pdf` from the same 20 synthetic invoices with `pdfkit` (a devDependency outside the course, used for data preparation only and named as such in the README). No owner-supplied PDFs; scans need OCR, which is outside the course.
 - **Slice 7, which providers:** Gemini models only, on the one key. The README says plainly that this is a comparison of models from one provider, not of providers.
+- **Slice 7, set and models:** the PDF copies (`date/pdf`), for `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite` (two runs each) and `gemini-3-flash-preview` (one run, its daily cap is 20 requests).
 - **Still open: prompt line on Romanian number format.** Candidate fix for the `14.txt` misread below. Measure before and after; do not assume.
 
 ### PDF input (slice 6)
@@ -191,14 +193,13 @@ Slices 0-6 are done, independently verified and pushed. Levels **Minim** and **B
 - The page text comes back with the same lines and words as the txt, but without leading indentation and with repeated spaces collapsed.
 - `pnpm start` and `pnpm eval` take an optional `pdf` argument (`start:pdf`, `eval:pdf`); any other argument throws. The script wiring is checked by running it, not by a test.
 
-### What slice 7 has to respect
+### Model comparison (slice 7)
 
-- Build each extractor directly with `creeazaExtractor(model, nume)`: no reserve, and the same `maxRetries` for every provider, so each number is that provider's own.
-- The latency figure wraps the whole call, including retries. With the default 6 retries one 503 adds 1-2 minutes.
-- One run cannot separate two models that differ by a single check (see the run history). Run each at least twice if the quota allows.
-- A model with no row in `cost.ts` is reported as "pret necunoscut", never as free. Ollama has no row.
-- Gemini models only (decision above). `gemini-3-flash-preview` allows 20 requests a day, so it gets one 20-invoice run a day at most.
-- Pick the input set (txt or PDF) in the brief and use the same one for every model.
+- Each model has its own extractor from `creeazaExtractor(model, nume)`, no reserve, `maxRetries` 2 for all (3 attempts; backoff adds seconds, not minutes). The library never retries a quota 429.
+- Each run's per-invoice results are saved in `rezultate/comparatie/<model>-<n>.json`; `pnpm compara:raport` rebuilds the report from them and refuses a file whose invoices were answered by another model or a reserve. `pnpm compara <model> <n>` overwrites that run's file, so redoing a run is visible only in git history.
+- The report reads accuracy on the extracted invoices; the "din toate" figures count failed extractions as wrong and are labelled as such. Failures are classified from the error text as 503, 429 or "alta"; the opening finding is computed from the data.
+- `cost.ts` gained `randPret` (the row name) so the report can name the price row; `pricingFor` behaves as before. `gemini-3-flash-preview` is priced with the `gemini-3-flash` row (longest prefix).
+- Known wording gaps, harmless on the committed data: the line saying failures measure availability is printed even when a failure is "alta" (an unusable response is quality, not availability); the finding says "toate diferentele" where only the check differences come from failures; the report does not say that output tokens include thinking tokens (why the preview has ~1036 per invoice against ~250).
 
 ### Gemini free tier, as observed on 2026-11-12
 
@@ -236,6 +237,18 @@ The committed report is always the latest run, never the best one.
 
 `pnpm start:pdf` the same day flagged all 5 faulty invoices: the reserve answered `17.pdf` and kept 31.02.
 
+Comparison, 2026-11-19, PDF set, no reserve, `maxRetries` 2 ([rezultate/comparatie.md](../rezultate/comparatie.md)):
+
+| Run | Extracted | Checks on extracted | Failed | Cost per extracted invoice | Median latency |
+|---|---|---|---|---|---|
+| 3.5-flash-lite #1 | 16 | 269 / 269 | 4 × 503 | $0.000752 | 60.0 s |
+| 3.5-flash-lite #2 | 18 | 300 / 300 | 2 × 503 | $0.000739 | 10.9 s |
+| 3.1-flash-lite #1 | 17 | 289 / 289 | 3 × 503 | $0.000468 | 7.2 s |
+| 3.1-flash-lite #2 | 20 | 334 / 334 | none | $0.000461 | 19.1 s |
+| 3-flash-preview #1 | 15 | 249 / 249 | 1 × 503, 4 × 429 (daily cap hit at invoice 17) | $0.003293 | 31.2 s |
+
+Every extracted invoice in every run was fully correct and validation was exact on all of them; `17.pdf` kept 31.02 in all 4 runs that extracted it. On this set accuracy does not separate the models; availability, cost and latency do.
+
 The txt `rezultate/eval.md` is from run 5 and has no `- Intrare:` line; the next txt `pnpm eval` adds it.
 
 Across the five runs the only wrong value on an extracted invoice is the `14.txt` total, in 2 runs of 5. The sum rule flags exactly that misread. No temperature is set in the course `llm.ts`. On clean text the set is easy for the model; the faulty invoices and the PDF text are where it is tested harder.
@@ -250,5 +263,6 @@ Across the five runs the only wrong value on an extracted invoice is the `14.txt
 ### Inputs for the final README (slice 8)
 
 - **What did not work:** provider 503s and the 20-per-day free-tier limit cost two live runs; the thousands separator misread; the reserve's error was hidden behind the primary's until the extractor recorded both; a perfect score on clean text says little; on the PDF run the model silently turned the impossible date 31.02.2026 into 2026-02-28, which no date rule can catch because the result is a real date.
+- **Comparison:** models of one provider (Gemini), not providers; PDF set; the preview costs about 7× per invoice what 3.1-flash-lite does (thinking tokens are billed as output) with no accuracy gain here; free-tier availability (503, the preview's 20-a-day cap, probably reached through retries — inferred from the counts, not confirmed) decided every gap.
 - **PDF:** generated from the txt set with `pdfkit` (dev-only, outside the course) in an embedded Liberation Sans font; the extracted text loses indentation and repeated spaces; no scanned PDFs (OCR is outside the course).
 - **What to add after L13-18, not implemented:** a human review queue for `de_verificat` invoices with a pause in the flow (L13); tracing and eval tracking in LangSmith (L18).

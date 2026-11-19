@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateCost, formatCost, pricingFor } from "../../src/lib/cost.js";
+import { calculateCost, formatCost, pricingFor, randPret } from "../../src/lib/cost.js";
 
 const UN_MILION = 1_000_000;
 
@@ -42,6 +42,31 @@ describe("pricingFor", () => {
 
   it("intoarce undefined pentru un model necunoscut", () => {
     expect(pricingFor("model-inexistent")).toBeUndefined();
+  });
+});
+
+describe("randPret", () => {
+  it("intoarce randul cu numele exact al modelului", () => {
+    expect(randPret("gemini-3.5-flash-lite")).toBe("gemini-3.5-flash-lite");
+    expect(randPret("gemini-3.1-flash-lite")).toBe("gemini-3.1-flash-lite");
+  });
+
+  it("intoarce cel mai lung prefix: gemini-3-flash-preview are randul gemini-3-flash", () => {
+    expect(randPret("gemini-3-flash-preview")).toBe("gemini-3-flash");
+    expect(randPret("gpt-4o-mini-2024-07-18")).toBe("gpt-4o-mini");
+  });
+
+  it("intoarce undefined pentru un model fara rand", () => {
+    expect(randPret("model-fals")).toBeUndefined();
+    expect(randPret("qwen3:8b")).toBeUndefined();
+  });
+
+  it("numeste randul al carui pret il da pricingFor", () => {
+    for (const model of ["gemini-3-flash-preview", "gemini-3.5-flash-lite", "GPT-4O-MINI-2024-07-18"]) {
+      const rand = randPret(model);
+      expect(rand, model).toBeDefined();
+      expect(pricingFor(rand ?? ""), model).toEqual(pricingFor(model));
+    }
   });
 });
 
