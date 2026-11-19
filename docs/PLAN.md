@@ -35,7 +35,7 @@ Only what labs 1-12 covered, and only what this exercise needs.
 |---|---|---|
 | `llm.ts`, `cost.ts` (copied from the course) | L1 | provider chosen by `LLM_PROVIDER`; cost report |
 | `withStructuredOutput` + Zod | L6 | extraction |
-| `RunnableLambda`, `.pipe` | L5 | joining steps |
+| `RunnableLambda` | L5 | one step per branch, so each fallback branch records its own error (`.pipe` is not used) |
 | `withFallbacks` | L2-3 | provider fallback |
 | Eval on a labelled dataset | L2-3 | accuracy per field |
 | `FakeToolCallingModel({ structuredResponse })` | L9 | offline tests |
@@ -111,7 +111,7 @@ flowchart TD
 - **Fallback:** the reserve model answers only when the primary throws (provider error after its retries); a response that arrives but is unusable (`parsed` null or outside the schema) stays an extraction failure and is not sent to the reserve. Each invoice is priced with the row of the model that answered it.
 - **Status:** `ok` or `de_verificat`, plus a `probleme` list naming each failed rule.
 - **CSV:** one row per line item, invoice fields repeated: `fisier, furnizor, cui, data, produs, cantitate, pret, total, status, probleme`. Fields containing `,` `"` or a newline are quoted, `"` doubled.
-- **Data:** 15 correct synthetic invoices and receipts in varied layouts, plus 5 with a planted fault (wrong sum, impossible date, bad CUI). Expected values record what the document says, faults included.
+- **Data:** 15 correct synthetic invoices and receipts in varied layouts, plus 5 with planted faults (wrong sum, impossible date, bad CUI; `20` has two). Expected values record what the document says, faults included.
 - **Files:** invoices are named with zero-padded numbers (`01.txt` ... `20.txt`); the same number names the expected values and the PDF.
 - **Failures:** `pnpm start` continues past a failed extraction: that invoice gets one CSV row with only `fisier`, status `de_verificat` and `extragere esuata: <first line of the error>` in `probleme`. `pnpm eval` records the failure, counts every field of that invoice as wrong, and continues.
 - **Eval:** a field is correct when it equals the expected value after normalisation (case and spaces for text, `RO` prefix for CUI, 0.01 for amounts). Reported: accuracy per field, invoices fully correct, and whether the flagged set equals the expected flagged set.
@@ -133,7 +133,7 @@ Each slice is test-first and ends in a command that shows the result.
 | 6 | PDF input with `pdfjs-dist`; `pnpm pdf` writes the PDFs from the txt set | `pnpm eval:pdf` → `rezultate/eval-pdf.md`, `pnpm start:pdf` → `rezultate/facturi-pdf.csv` | done |
 | 7 | Comparison of 3 Gemini models on the PDF set | `pnpm compara` → `rezultate/comparatie.md`: accuracy per field, cost, latency | done |
 | | **Avansat** — tag `avansat`, set at the slice 7 commit | | reached |
-| 8 | Final README | level reached, eval results, cost, what did not work, what to add after L13-18 | todo |
+| 8 | Final README | level reached, eval results, cost, what did not work, what to add after L13-18 | done |
 
 ### How a slice is run
 
@@ -169,7 +169,7 @@ Verifier:
 
 ## 6. State and next steps
 
-Slices 0-7 are done, independently verified and pushed. Levels **Minim**, **Bun** and **Avansat** are met. Left: slice 8 (README).
+All slices (0-8) are done and independently verified. Levels **Minim**, **Bun** and **Avansat** are met. Every figure in the README cites its source file. Left on purpose: the Romanian number-format prompt line (never measured), and the comparison report's wording gaps listed below.
 
 ### To resume
 
@@ -206,7 +206,7 @@ Slices 0-7 are done, independently verified and pushed. Levels **Minim**, **Bun*
 | Model | Observed |
 |---|---|
 | `gemini-3.5-flash-lite` (primary) | about 140 calls in the day with no quota error; 503 "high demand" after retries during a few hours of the afternoon |
-| `gemini-3.1-flash-lite` (reserve) | answered every time it was called; has its own price row |
+| `gemini-3.1-flash-lite` (reserve) | answered whenever its daily quota allowed; the quota ran out during run 4 (see the run history); has its own price row |
 | `gemini-3-flash-preview` | hard limit of 20 requests per day (429 `GenerateRequestsPerDayPerProjectPerModel-FreeTier`); a thinking model |
 | `gemini-3.6-flash` | timed out |
 | `gemini-flash-latest` | 503 |
@@ -233,7 +233,7 @@ The committed report is always the latest run, never the best one.
 | 3 | 15 | 13 | 217 / 255 | two invoices lost to 503; same `14.txt` misread |
 | 4 | 20 | 17 | 283 / 334 | three lost to 503 with the reserve's daily quota exhausted; all 17 fully correct |
 | 5 | 20 | 20 | 334 / 334 | reserve answered 4; validation 5/5, 15/15, 20/20; cost $0.0137 at list price |
-| 6 (PDF) | 20 | 20 | 333 / 334 | `17.pdf`: the impossible date 31.02.2026 returned as `2026-02-28`, so validation 4/5; `14` total read correctly; `20.pdf` took 296 s on retries; cost $0.0147 |
+| 6 (PDF) | 20 | 20 | 333 / 334 | `17.pdf`: the impossible date 31.02.2026 returned as `2026-02-28`, so validation 4/5; `14` total read correctly; `20.pdf` took 296 s (slow calls: the primary had 1 retry and answered it; no request timeout); cost $0.0147 |
 
 `pnpm start:pdf` the same day flagged all 5 faulty invoices: the reserve answered `17.pdf` and kept 31.02.
 
@@ -247,7 +247,7 @@ Comparison, 2026-11-19, PDF set, no reserve, `maxRetries` 2 ([rezultate/comparat
 | 3.1-flash-lite #2 | 20 | 334 / 334 | none | $0.000461 | 19.1 s |
 | 3-flash-preview #1 | 15 | 249 / 249 | 1 × 503, 4 × 429 (daily cap hit at invoice 17) | $0.003293 | 31.2 s |
 
-Every extracted invoice in every run was fully correct and validation was exact on all of them; `17.pdf` kept 31.02 in all 4 runs that extracted it. On this set accuracy does not separate the models; availability, cost and latency do.
+Every extracted invoice in every run was fully correct and validation was exact on all of them; `17.pdf` kept 31.02 in all 4 runs that extracted it. On this set accuracy does not separate the models; cost per invoice does (stable across runs). Latency and 503 counts vary as much between runs of the same model as between models, so they do not; the preview also has the 20-a-day cap.
 
 The txt `rezultate/eval.md` is from run 5 and has no `- Intrare:` line; the next txt `pnpm eval` adds it.
 
@@ -263,6 +263,6 @@ Across the five runs the only wrong value on an extracted invoice is the `14.txt
 ### Inputs for the final README (slice 8)
 
 - **What did not work:** provider 503s and the 20-per-day free-tier limit cost two live runs; the thousands separator misread; the reserve's error was hidden behind the primary's until the extractor recorded both; a perfect score on clean text says little; on the PDF run the model silently turned the impossible date 31.02.2026 into 2026-02-28, which no date rule can catch because the result is a real date.
-- **Comparison:** models of one provider (Gemini), not providers; PDF set; the preview costs about 7× per invoice what 3.1-flash-lite does (thinking tokens are billed as output) with no accuracy gain here; free-tier availability (503, the preview's 20-a-day cap, probably reached through retries — inferred from the counts, not confirmed) decided every gap.
+- **Comparison:** models of one provider (Gemini), not providers; PDF set; the preview costs about 7× per invoice what 3.1-flash-lite does (about 2× the list price and about 4× the output tokens, thinking included) with no accuracy gain here; every gap in checks came from failed extractions (503, and the preview's 20-a-day cap, probably reached through retries — inferred from the counts, not confirmed).
 - **PDF:** generated from the txt set with `pdfkit` (dev-only, outside the course) in an embedded Liberation Sans font; the extracted text loses indentation and repeated spaces; no scanned PDFs (OCR is outside the course).
 - **What to add after L13-18, not implemented:** a human review queue for `de_verificat` invoices with a pause in the flow (L13); tracing and eval tracking in LangSmith (L18).
